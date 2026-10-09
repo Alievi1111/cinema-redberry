@@ -12,6 +12,10 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  if (config.url === "/login") {
+    return config;
+  }
+
   const token = getAuthToken();
 
   if (token) {
