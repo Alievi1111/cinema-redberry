@@ -5,7 +5,7 @@ import { getAuthToken } from "@/lib/auth-token";
 export const api = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "https://api.kinoxii.redberryinternship.ge",
+    "https://api.kinoxii.redberryinternship.ge/api",
   headers: {
     Accept: "application/json",
   },
