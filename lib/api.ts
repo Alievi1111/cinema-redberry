@@ -12,7 +12,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  if (config.url === "/login") {
+  if (config.url === "/login" || config.url === "/register") {
     return config;
   }
 
