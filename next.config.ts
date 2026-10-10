@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         hostname: 'api.kinoxii.redberryinternship.ge',
         pathname: '/storage/avatars/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/t/p/**',
+      },
     ],
   },
 };

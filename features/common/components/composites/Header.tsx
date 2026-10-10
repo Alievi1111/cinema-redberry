@@ -12,6 +12,7 @@ import AuthModal, {
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { clearAuthToken } from '@/features/auth/lib/auth-session';
 import ProfileDropdown from '../primitives/ProfileDropdown';
+import HeaderSearch from './HeaderSearch';
 
 const Header = () => {
   const router = useRouter();
@@ -69,7 +70,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="flex justify-center items-center bg-[linear-gradient(180deg,#000000_-212.35%,rgba(0,0,0,0.51)_32.09%,rgba(0,0,0,0)_93.93%)] w-full">
+      <header className="z-50 relative flex justify-center items-center bg-[linear-gradient(180deg,#000000_-212.35%,rgba(0,0,0,0.51)_32.09%,rgba(0,0,0,0)_93.93%)] w-full">
         <div className="flex items-center px-[60px] pt-[30px] pb-[40px] w-full max-w-[1728px]">
           <div className="flex items-center gap-[36px]">
             <Link href="/" className="flex items-center gap-[4px]">
@@ -84,20 +85,7 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-[32px] ml-auto">
-            <div className="flex items-center gap-[4px] bg-white/10 px-[12px] rounded-full min-w-[380px] h-[41px]">
-              <Image
-                src="/icons/searchVector.svg"
-                alt="Search"
-                width={16}
-                height={16}
-              />
-
-              <input
-                type="text"
-                placeholder="Search films and live events"
-                className="bg-transparent outline-none w-full text-[14px] text-white placeholder:text-white"
-              />
-            </div>
+            <HeaderSearch />
 
             {isLoading ? (
               <div className="bg-white/10 rounded-full w-[194px] h-[41px] animate-pulse" />
