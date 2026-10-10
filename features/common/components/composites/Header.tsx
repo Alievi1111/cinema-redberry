@@ -15,10 +15,10 @@ const Header = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-[12px] ml-auto">
-          <div className="flex items-center gap-[4px] bg-white/10 px-[12px] rounded-full w-[380px] h-[41px]">
+        <div className="flex items-center gap-[32px] ml-auto">
+          <div className="flex items-center gap-[4px] bg-white/10 px-[12px] rounded-full min-w-[380px] h-[41px]">
             <Image
-              src="/icons/searchVectors.svg"
+              src="../../../../public/icons/searchVector.svg"
               alt="Search"
               width={16}
               height={16}
@@ -30,20 +30,21 @@ const Header = () => {
               className="bg-transparent outline-none w-full text-[14px] text-white placeholder:text-white"
             />
           </div>
+          <div className="flex gap-[12px]">
+            <button
+              type="button"
+              className="bg-[#FF321F] rounded-full w-[96px] h-[41px] font-semibold text-[14px] text-white cursor-pointer"
+            >
+              Sign up
+            </button>
 
-          <button
-            type="button"
-            className="bg-[#FF321F] rounded-full w-[96px] h-[41px] font-semibold text-[14px] text-white cursor-pointer"
-          >
-            Sign up
-          </button>
-
-          <button
-            type="button"
-            className="bg-white rounded-full w-[86px] h-[41px] font-semibold text-[#020B1C] text-[14px] cursor-pointer"
-          >
-            Log in
-          </button>
+            <button
+              type="button"
+              className="bg-white rounded-full w-[86px] h-[41px] font-semibold text-[#020B1C] text-[14px] cursor-pointer"
+            >
+              Log in
+            </button>
+          </div>
         </div>
       </div>
     </header>
