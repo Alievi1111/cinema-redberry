@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+
 import { QueryProvider } from './QueryProvider';
 import Header from '@/features/common/components/composites/Header';
+
 import './globals.css';
 
 const geistSans = Geist({
@@ -15,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'My Website',
-  description: 'My website description',
+  title: 'KINOXII',
+  description: 'Discover movies, explore sessions, and book cinema tickets.',
 };
 
 export default function RootLayout({

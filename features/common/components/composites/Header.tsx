@@ -6,11 +6,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+
 import AuthModal, {
   type AuthVariant,
 } from '@/features/auth/components/composites/AuthModal';
+
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { clearAuthToken } from '@/features/auth/lib/auth-session';
+
 import ProfileDropdown from '../primitives/ProfileDropdown';
 import HeaderSearch from './HeaderSearch';
 
@@ -70,7 +73,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="z-50 relative flex justify-center items-center bg-[linear-gradient(180deg,#000000_-212.35%,rgba(0,0,0,0.51)_32.09%,rgba(0,0,0,0)_93.93%)] w-full">
+      <header className="top-0 left-0 z-50 fixed flex justify-center items-center bg-[linear-gradient(180deg,#000000_-212.35%,rgba(0,0,0,0.51)_32.09%,rgba(0,0,0,0)_93.93%)] w-full">
         <div className="flex items-center px-[60px] pt-[30px] pb-[40px] w-full max-w-[1728px]">
           <div className="flex items-center gap-[36px]">
             <Link href="/" className="flex items-center gap-[4px]">
@@ -113,7 +116,7 @@ const Header = () => {
                   type="button"
                   aria-label="Toggle profile menu"
                   aria-expanded={isProfileOpen}
-                  aria-controls="profile-dropdown"
+                  aria-controls={isProfileOpen ? 'profile-dropdown' : undefined}
                   onClick={() => setIsProfileOpen((prev) => !prev)}
                   className="flex items-center gap-[12px] cursor-pointer"
                 >
