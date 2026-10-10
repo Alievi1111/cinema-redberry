@@ -1,5 +1,9 @@
-const Home = () => {
-  return <div></div>;
-};
+import Hero from '@/features/home/components/composites/Hero';
 
-export default Home;
+export default function HomePage() {
+  return (
+    <main>
+      <Hero />
+    </main>
+  );
+}
