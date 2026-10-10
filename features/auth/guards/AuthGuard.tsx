@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { AuthLoadingScreen } from '@/features/common/components/primitives/AuthLoadingScreen';
+import { REDIRECT } from '../config/routes.config';
 
 interface GuardProps {
   children: React.ReactNode;

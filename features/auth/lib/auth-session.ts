@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'auth_token';
-const SESSION_KEY = 'auth_session_id';
+const TOKEN_KEY = 'kinoxii_auth_token';
+const SESSION_KEY = 'kinoxii_auth_session_id';
 
 export const AUTH_CHANGED_EVENT = 'auth:changed';
 
