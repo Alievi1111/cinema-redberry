@@ -54,7 +54,7 @@ const PopupWrapper = ({ children, onClose }: PopupWrapperProps) => {
   }, []);
 
   return (
-    <div className="z-[999] fixed inset-0 flex justify-center items-center px-4">
+    <div className="z-[999] fixed inset-0 flex justify-center items-center shadow-[0px_20px_50px_-10px_var(--shadow)] px-4 border border-[#2A2C3D]">
       <motion.div
         variants={backdropVariants}
         initial="hidden"

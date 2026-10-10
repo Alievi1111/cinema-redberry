@@ -1,8 +1,8 @@
 'use client';
 
 import PopupWrapper from '@/features/common/components/primitives/PopupWrapper';
-import Login from '../primitives/Login';
-import SignUp from '../primitives/SignUp';
+import Login from './Login';
+import SignUp from './SignUp';
 
 export type AuthVariant = 'logIn' | 'signUp';
 
@@ -18,9 +18,15 @@ const AuthModal = ({ variant, onClose, onChangeVariant }: AuthModalProps) => {
   return (
     <PopupWrapper onClose={onClose}>
       {isLogin ? (
-        <Login onSignUpClick={() => onChangeVariant('signUp')} />
+        <Login
+          onSignUpClick={() => onChangeVariant('signUp')}
+          onSuccess={onClose}
+        />
       ) : (
-        <SignUp onLogInClick={() => onChangeVariant('logIn')} />
+        <SignUp
+          onLogInClick={() => onChangeVariant('logIn')}
+          onSuccess={onClose}
+        />
       )}
     </PopupWrapper>
   );

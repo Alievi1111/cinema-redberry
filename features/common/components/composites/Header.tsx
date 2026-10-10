@@ -6,6 +6,7 @@ import Image from 'next/image';
 import AuthModal, {
   AuthVariant,
 } from '@/features/auth/components/composites/AuthModal';
+import Link from 'next/link';
 
 const Header = () => {
   const [authVariant, setAuthVariant] = useState<AuthVariant | null>(null);
@@ -17,10 +18,10 @@ const Header = () => {
       <header className="flex justify-center items-center bg-[linear-gradient(180deg,#000000_-212.35%,rgba(0,0,0,0.51)_32.09%,rgba(0,0,0,0)_93.93%)] w-full">
         <div className="flex items-center px-[60px] pt-[30px] pb-[40px] w-full max-w-[1728px]">
           <div className="flex items-center gap-[36px]">
-            <div className="flex items-center gap-[4px]">
+            <Link href={'/'} className="flex items-center gap-[4px]">
               <span className="font-bold text-[20px] text-white">KINO</span>
               <span className="font-bold text-[#FF321F] text-[20px]">XII</span>
-            </div>
+            </Link>
 
             <p className="font-semibold text-[12px] text-white cursor-pointer">
               SESSIONS
@@ -69,7 +70,7 @@ const Header = () => {
           <AuthModal
             key="auth-modal"
             variant={authVariant}
-            onClose={closeModal}
+            onClose={() => setAuthVariant(null)}
             onChangeVariant={setAuthVariant}
           />
         )}
