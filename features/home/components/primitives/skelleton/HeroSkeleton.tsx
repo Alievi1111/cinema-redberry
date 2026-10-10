@@ -3,7 +3,7 @@ const HeroSkeleton = () => {
     <section
       aria-label="Loading featured movies"
       role="status"
-      className="relative flex items-center bg-[#020B1C] w-full min-h-[620px]"
+      className="relative flex items-center bg-[#020B1C] w-full min-h-[760px]"
     >
       <div className="mx-auto px-5 sm:px-10 lg:px-[67px] w-full max-w-[1728px]">
         <div className="flex flex-col gap-[15px] w-full max-w-[580px] animate-pulse">

@@ -1,8 +1,8 @@
 'use client';
 
 import { useFeaturedMovies } from '../../hook/use-featured-movies';
-import HeroSkeleton from '../primitives/HeroSkeleton';
-import HeroError from '../primitives/HeroError';
+import HeroSkeleton from '../primitives/skelleton/HeroSkeleton';
+import HeroError from '../primitives/skelleton/HeroError';
 import HeroCarousel from '../primitives/HeroCarousel';
 
 const Hero = () => {
