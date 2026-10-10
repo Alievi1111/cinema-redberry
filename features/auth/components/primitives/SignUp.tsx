@@ -1,6 +1,9 @@
 import Image from 'next/image';
 
-const SignUpPage = () => {
+type SignUpPageProps = {
+  onLogInClick: () => void;
+};
+const SignUp = ({ onLogInClick }: SignUpPageProps) => {
   return (
     <>
       <div className="pr-10">
@@ -112,6 +115,7 @@ const SignUpPage = () => {
 
           <button
             type="button"
+            onClick={onLogInClick}
             className="font-semibold text-[#FF3B30] cursor-pointer"
           >
             Log in
@@ -122,4 +126,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SignUp;

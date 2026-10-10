@@ -1,4 +1,8 @@
-const LoginPage = () => {
+type LoginPageProps = {
+  onSignUpClick: () => void;
+};
+
+const Login = ({ onSignUpClick }: LoginPageProps) => {
   return (
     <>
       <div className="pr-10">
@@ -58,6 +62,7 @@ const LoginPage = () => {
 
           <button
             type="button"
+            onClick={onSignUpClick}
             className="font-semibold text-[#FF3B30] cursor-pointer"
           >
             Sign up
@@ -68,4 +73,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;

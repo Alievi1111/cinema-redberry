@@ -74,7 +74,7 @@ const PopupWrapper = ({ children, onClose }: PopupWrapperProps) => {
         animate="visible"
         exit="exit"
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="z-10 relative bg-[#020B1C] p-8 rounded-[28px] w-full max-w-[403px] h-[399px] max-h-[calc(100dvh-32px)] overflow-y-auto"
+        className="z-10 relative bg-[#020B1C] p-8 rounded-[28px] w-full max-w-[475px] max-h-[calc(100dvh-32px)] overflow-y-auto"
       >
         <button
           type="button"
