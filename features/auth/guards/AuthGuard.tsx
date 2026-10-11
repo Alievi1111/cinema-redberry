@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useAuthChallenge } from '@/features/auth/hook/use-auth-challenge';
+import { waitForLogin } from '@/features/auth/lib/auth-challenge';
 import { AuthLoadingScreen } from '@/features/common/components/primitives/AuthLoadingScreen';
 import { REDIRECT } from '../config/routes.config';
 
@@ -15,14 +17,23 @@ export const AuthGuard = ({ children }: GuardProps) => {
 
   const { isAuthenticated, hasToken, isLoading, isError, refetch } =
     useAuthUser();
+  const challengePending = useAuthChallenge();
+  const challengeStarted = useRef(false);
 
   useEffect(() => {
-    if (!isLoading && !hasToken) {
-      router.replace(REDIRECT.afterLogout);
-    }
-  }, [isLoading, hasToken, router]);
+    if (isLoading || hasToken) return;
 
-  if (isLoading) return <AuthLoadingScreen />;
+    if (challengePending) {
+      challengeStarted.current = true;
+    } else if (challengeStarted.current) {
+      router.replace(REDIRECT.afterLogout);
+    } else {
+      challengeStarted.current = true;
+      void waitForLogin().catch(() => {});
+    }
+  }, [isLoading, hasToken, challengePending, router]);
+
+  if (isLoading || challengePending) return <AuthLoadingScreen />;
 
   if (isError) {
     return (

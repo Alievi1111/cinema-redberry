@@ -3,7 +3,7 @@
 import type { AxiosError } from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { setAuthToken } from "@/lib/auth-token";
+import { getAuthSessionId, saveAuthToken } from "../lib/auth-session";
 
 import { registerApi } from "../api/register-api";
 import { AUTH_USER_QUERY_KEY } from "../query-keys";
@@ -24,8 +24,11 @@ export function useRegister() {
   >({
     mutationFn: registerApi,
     onSuccess: ({ token, user }) => {
-      setAuthToken(token);
-      queryClient.setQueryData<AuthUser>(AUTH_USER_QUERY_KEY, user);
+      saveAuthToken(token);
+      queryClient.setQueryData<AuthUser>(
+        [...AUTH_USER_QUERY_KEY, getAuthSessionId()],
+        user
+      );
     },
   });
 }

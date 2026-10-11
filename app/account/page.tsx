@@ -1,5 +1,4 @@
 import AccountContent from '@/features/account/components/composites/AccountContent';
-import AccountNavBar from '@/features/account/components/composites/AccountNavBar';
 import { AuthGuard } from '@/features/auth/guards/AuthGuard';
 
 const Account = () => {

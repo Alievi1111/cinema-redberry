@@ -91,7 +91,6 @@ const HeaderSearch = () => {
           onKeyDown={handleEnter}
           placeholder="Search films and live events"
           aria-label="Search films and live events"
-          aria-expanded={showDropdown}
           aria-controls={showDropdown ? 'header-search-results' : undefined}
           autoComplete="off"
           className="bg-transparent outline-none w-full text-[14px] text-white placeholder:text-white"

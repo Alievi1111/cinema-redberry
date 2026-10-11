@@ -9,10 +9,16 @@ export type AuthVariant = 'logIn' | 'signUp';
 type AuthModalProps = {
   variant: AuthVariant;
   onClose: () => void;
+  onSuccess: () => void;
   onChangeVariant: (variant: AuthVariant) => void;
 };
 
-const AuthModal = ({ variant, onClose, onChangeVariant }: AuthModalProps) => {
+const AuthModal = ({
+  variant,
+  onClose,
+  onSuccess,
+  onChangeVariant,
+}: AuthModalProps) => {
   const isLogin = variant === 'logIn';
 
   return (
@@ -20,12 +26,12 @@ const AuthModal = ({ variant, onClose, onChangeVariant }: AuthModalProps) => {
       {isLogin ? (
         <Login
           onSignUpClick={() => onChangeVariant('signUp')}
-          onSuccess={onClose}
+          onSuccess={onSuccess}
         />
       ) : (
         <SignUp
           onLogInClick={() => onChangeVariant('logIn')}
-          onSuccess={onClose}
+          onSuccess={onSuccess}
         />
       )}
     </PopupWrapper>

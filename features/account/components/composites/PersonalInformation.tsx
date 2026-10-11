@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
@@ -64,24 +64,23 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
     });
   }, [user, reset]);
 
-  const venueOptions = useMemo(() => {
-    const availableVenues = [...venues];
+  const availableVenues = [...venues];
+  const preferredVenue = user?.preferredVenue;
 
-    if (
-      user?.preferredVenue &&
-      !availableVenues.some((venue) => venue.id === user.preferredVenue?.id)
-    ) {
-      availableVenues.unshift({
-        id: user.preferredVenue.id,
-        name: user.preferredVenue.name,
-      });
-    }
+  if (
+    preferredVenue &&
+    !availableVenues.some((venue) => venue.id === preferredVenue.id)
+  ) {
+    availableVenues.unshift({
+      id: preferredVenue.id,
+      name: preferredVenue.name,
+    });
+  }
 
-    return availableVenues.map((venue) => ({
-      label: venue.name,
-      value: String(venue.id),
-    }));
-  }, [venues, user?.preferredVenue]);
+  const venueOptions = availableVenues.map((venue) => ({
+    label: venue.name,
+    value: String(venue.id),
+  }));
 
   const onSubmit = async (values: UpdateProfileFormValues) => {
     setIsSaved(false);

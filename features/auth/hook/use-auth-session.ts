@@ -1,14 +1,19 @@
 'use client';
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 
-import { AUTH_CHANGED_EVENT, getAuthSessionId } from '../lib/auth-session';
+import {
+  AUTH_CHANGED_EVENT,
+  AUTH_SESSION_KEY,
+  AUTH_TOKEN_KEY,
+  getAuthSessionId,
+} from '../lib/auth-session';
 
 const subscribe = (callback: () => void) => {
   const onStorage = (event: StorageEvent) => {
     if (
-      event.key === 'auth_token' ||
-      event.key === 'auth_session_id' ||
+      event.key === AUTH_TOKEN_KEY ||
+      event.key === AUTH_SESSION_KEY ||
       event.key === null
     ) {
       callback();
@@ -24,6 +29,10 @@ const subscribe = (callback: () => void) => {
   };
 };
 
+const subscribeToHydration = () => () => {};
+const getClientReady = () => true;
+const getServerReady = () => false;
+
 export const useAuthSession = () => {
   const sessionId = useSyncExternalStore(
     subscribe,
@@ -31,11 +40,11 @@ export const useAuthSession = () => {
     () => null
   );
 
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
+  const isReady = useSyncExternalStore(
+    subscribeToHydration,
+    getClientReady,
+    getServerReady
+  );
 
   return { sessionId, isReady };
 };

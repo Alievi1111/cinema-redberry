@@ -32,7 +32,7 @@ const TicketsError = ({ onRetry }: TicketsErrorProps) => {
         </h2>
 
         <p className="mt-[8px] text-[#A9A9A9] text-[14px] leading-[150%]">
-          We couldn't load your tickets. Please check your connection and try
+          We couldn&apos;t load your tickets. Please check your connection and try
           again.
         </p>
 
