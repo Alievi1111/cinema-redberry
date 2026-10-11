@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import Image from 'next/image';
 
 import type { FeaturedMovie } from '../../types/featured-movie.types';
 import HeroSlide from '../primitives/HeroSlide';
@@ -39,8 +40,6 @@ const HeroCarousel = ({ movies }: HeroCarouselProps) => {
 
   useEffect(() => {
     if (!emblaApi) return;
-
-    onSelect();
 
     emblaApi.on('select', onSelect);
     emblaApi.on('reInit', onSelect);
@@ -114,22 +113,28 @@ const HeroCarousel = ({ movies }: HeroCarouselProps) => {
                 type="button"
                 aria-label="Previous movie"
                 onClick={scrollPrev}
-                className="flex justify-center items-center hover:bg-white/10 border border-white/30 hover:border-white rounded-full w-[40px] h-[40px] text-white transition-all duration-200 cursor-pointer"
+                className="flex h-[54px] w-[54px] cursor-pointer items-center justify-center rounded-full bg-[#050A1E]/20 transition-colors duration-200 hover:bg-[#050A1E]/40 focus-visible:outline-2 focus-visible:outline-white"
               >
-                <span aria-hidden="true" className="text-[20px]">
-                  ←
-                </span>
+                <Image
+                  src="/icons/left-arrow.svg"
+                  alt=""
+                  width={11}
+                  height={20}
+                />
               </button>
 
               <button
                 type="button"
                 aria-label="Next movie"
                 onClick={scrollNext}
-                className="flex justify-center items-center hover:bg-white/10 border border-white/30 hover:border-white rounded-full w-[40px] h-[40px] text-white transition-all duration-200 cursor-pointer"
+                className="flex h-[54px] w-[54px] cursor-pointer items-center justify-center rounded-full bg-[#050A1E]/20 transition-colors duration-200 hover:bg-[#050A1E]/40 focus-visible:outline-2 focus-visible:outline-white"
               >
-                <span aria-hidden="true" className="text-[20px]">
-                  →
-                </span>
+                <Image
+                  src="/icons/right-arrow.svg"
+                  alt=""
+                  width={11}
+                  height={20}
+                />
               </button>
             </div>
           </div>

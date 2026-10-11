@@ -4,14 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getMyTicketsApi } from '../api/get-my-tickets-api';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useAuthSession } from '@/features/auth/hook/use-auth-session';
 
 export const MY_TICKETS_QUERY_KEY = ['my-tickets'] as const;
 
 export const useMyTickets = () => {
   const { user, isAuthenticated } = useAuthUser();
+  const { sessionId } = useAuthSession();
 
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: [...MY_TICKETS_QUERY_KEY, user?.id],
+    queryKey: [...MY_TICKETS_QUERY_KEY, user?.id, sessionId],
 
     queryFn: ({ signal }) => getMyTicketsApi(signal),
 

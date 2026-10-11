@@ -11,7 +11,13 @@ import AuthModal, {
   type AuthVariant,
 } from '@/features/auth/components/composites/AuthModal';
 
+import { logoutApi } from '@/features/auth/api/logout-api';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useAuthChallenge } from '@/features/auth/hook/use-auth-challenge';
+import {
+  cancelAuthChallenge,
+  completeAuthChallenge,
+} from '@/features/auth/lib/auth-challenge';
 import { clearAuthToken } from '@/features/auth/lib/auth-session';
 
 import ProfileDropdown from '../primitives/ProfileDropdown';
@@ -22,6 +28,9 @@ const Header = () => {
   const queryClient = useQueryClient();
 
   const [authVariant, setAuthVariant] = useState<AuthVariant | null>(null);
+  const isAuthChallengePending = useAuthChallenge();
+  const visibleAuthVariant =
+    authVariant ?? (isAuthChallengePending ? 'logIn' : null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const profileRef = useRef<HTMLDivElement>(null);
@@ -62,13 +71,28 @@ const Header = () => {
     };
   }, [isProfileOpen]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsProfileOpen(false);
 
-    clearAuthToken();
-    queryClient.clear();
+    try {
+      await logoutApi();
+    } catch {
+      // A failed revoke must not keep the local session active.
+    } finally {
+      clearAuthToken();
+      queryClient.clear();
+      router.replace('/');
+    }
+  };
 
-    router.replace('/');
+  const handleAuthClose = () => {
+    setAuthVariant(null);
+    cancelAuthChallenge();
+  };
+
+  const handleAuthSuccess = () => {
+    setAuthVariant(null);
+    completeAuthChallenge();
   };
 
   return (
@@ -82,9 +106,12 @@ const Header = () => {
               <span className="font-bold text-[#FF321F] text-[20px]">XII</span>
             </Link>
 
-            <p className="font-semibold text-[12px] text-white cursor-pointer">
+            <Link
+              href="/sessions"
+              className="font-semibold text-[12px] text-white cursor-pointer"
+            >
               SESSIONS
-            </p>
+            </Link>
           </div>
 
           <div className="flex items-center gap-[32px] ml-auto">
@@ -177,11 +204,12 @@ const Header = () => {
       </header>
 
       <AnimatePresence>
-        {authVariant && (
+        {visibleAuthVariant && (
           <AuthModal
             key="auth-modal"
-            variant={authVariant}
-            onClose={() => setAuthVariant(null)}
+            variant={visibleAuthVariant}
+            onClose={handleAuthClose}
+            onSuccess={handleAuthSuccess}
             onChangeVariant={setAuthVariant}
           />
         )}

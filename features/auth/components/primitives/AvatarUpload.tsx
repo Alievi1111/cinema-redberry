@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { useController, type Control } from 'react-hook-form';
+import { Controller, type Control } from 'react-hook-form';
 
 import type { RegisterPayload } from '@/features/auth/types/type';
 
@@ -12,11 +12,6 @@ type AvatarUploadProps = {
 };
 
 const AvatarUpload = ({ control, error }: AvatarUploadProps) => {
-  const { field } = useController({
-    name: 'avatar',
-    control,
-  });
-
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const previewRef = useRef<string | null>(null);
 
@@ -28,7 +23,10 @@ const AvatarUpload = ({ control, error }: AvatarUploadProps) => {
     };
   }, []);
 
-  const handleFileChange = (file?: File) => {
+  const handleFileChange = (
+    file: File | undefined,
+    onChange: (value: File | null) => void
+  ) => {
     if (previewRef.current) {
       URL.revokeObjectURL(previewRef.current);
     }
@@ -39,22 +37,30 @@ const AvatarUpload = ({ control, error }: AvatarUploadProps) => {
 
     previewRef.current = url;
     setPreviewUrl(url);
-    field.onChange(file ?? null);
+    onChange(file ?? null);
   };
 
   return (
     <div>
-      <input
-        id="register-avatar"
-        type="file"
-        name={field.name}
-        ref={field.ref}
-        onBlur={field.onBlur}
-        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-        onChange={(e) => handleFileChange(e.target.files?.[0])}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? 'register-avatar-error' : undefined}
-        className="sr-only"
+      <Controller
+        name="avatar"
+        control={control}
+        render={({ field }) => (
+          <input
+            id="register-avatar"
+            type="file"
+            name={field.name}
+            ref={field.ref}
+            onBlur={field.onBlur}
+            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            onChange={(event) =>
+              handleFileChange(event.target.files?.[0], field.onChange)
+            }
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? 'register-avatar-error' : undefined}
+            className="sr-only"
+          />
+        )}
       />
 
       <label
@@ -72,7 +78,7 @@ const AvatarUpload = ({ control, error }: AvatarUploadProps) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <Image src="/icons/uploadicon.svg" alt="" width={12} height={11} />
+            <Image src="/icons/upload-avatar.svg" alt="" width={12} height={11} />
           )}
         </div>
 
