@@ -1,7 +1,30 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 
 import SessionsView from '@/features/sessions/components/composites/SessionsView';
 import SessionResultsSkeleton from '@/features/sessions/components/composites/SessionResultsSkeleton';
+import { siteUrl } from '@/lib/seo';
+
+const description =
+  'Browse Kino XII showtimes by cinema, date, format, language, and time. Find available seats and book your tickets.';
+
+export const metadata: Metadata = {
+  title: 'Sessions',
+  description,
+  alternates: siteUrl ? { canonical: '/sessions' } : undefined,
+  openGraph: {
+    title: 'Cinema Sessions | Kino XII',
+    description,
+    url: siteUrl ? '/sessions' : undefined,
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Kino XII cinema sessions' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cinema Sessions | Kino XII',
+    description,
+    images: ['/twitter-image'],
+  },
+};
 
 const SessionsPage = () => (
   <div className="mx-auto px-5 sm:px-10 lg:px-[51px] pt-[112px] pb-[80px] w-full max-w-[1728px] text-white">

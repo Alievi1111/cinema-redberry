@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { QueryProvider } from './QueryProvider';
@@ -6,6 +6,7 @@ import Header from '@/features/common/components/composites/Header';
 
 import './globals.css';
 import Footer from '@/features/common/components/composites/Footer';
+import { siteUrl } from '@/lib/seo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -17,9 +18,36 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+export const viewport: Viewport = {
+  themeColor: '#080D1F',
+};
+
 export const metadata: Metadata = {
-  title: 'KINOXII',
-  description: 'Discover movies, explore sessions, and book cinema tickets.',
+  // A real public origin is configured at deployment; localhost only supports local previews.
+  metadataBase: siteUrl ?? new URL('http://localhost:3000'),
+  applicationName: 'Kino XII',
+  title: {
+    default: 'Kino XII | Movies, Showtimes & Tickets',
+    template: '%s | Kino XII',
+  },
+  description:
+    'Discover movies, explore showtimes across Kino XII cinemas, choose your seats, and book tickets online.',
+  alternates: siteUrl ? { canonical: '/' } : undefined,
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Kino XII',
+    title: 'Kino XII | Movies, Showtimes & Tickets',
+    description:
+      'Discover movies, explore showtimes, choose your seats, and book tickets online.',
+    url: siteUrl ? '/' : undefined,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kino XII | Movies, Showtimes & Tickets',
+    description:
+      'Discover movies, explore showtimes, choose your seats, and book tickets online.',
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +57,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="ka"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body className="flex flex-col min-h-screen">

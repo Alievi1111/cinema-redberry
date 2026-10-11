@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
+
 import AccountContent from "@/features/account/components/composites/AccountContent";
 import { AuthGuard } from "@/features/auth/guards/AuthGuard";
+
+export const metadata: Metadata = {
+  title: 'My Account',
+  description: 'Manage your Kino XII profile and tickets.',
+  robots: { index: false, follow: false },
+};
 
 const Account = () => {
   return (
