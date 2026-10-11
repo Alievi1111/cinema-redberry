@@ -1,0 +1,43 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+
+import { getMyTicketsApi } from '../api/get-my-tickets-api';
+import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useAuthSession } from '@/features/auth/hook/use-auth-session';
+import { partitionTicketOrders } from '../utils/refund-order';
+
+export const MY_TICKETS_QUERY_KEY = ['my-tickets'] as const;
+
+export const useMyTickets = () => {
+  const { user, isAuthenticated } = useAuthUser();
+  const { sessionId } = useAuthSession();
+
+  const { data, isPending, isError, refetch } = useQuery({
+    queryKey: [...MY_TICKETS_QUERY_KEY, user?.id, sessionId],
+
+    queryFn: ({ signal }) => getMyTicketsApi(signal),
+
+    enabled: isAuthenticated,
+
+    retry: false,
+    staleTime: 1000 * 30,
+    gcTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+
+  const orders = data ?? [];
+
+  const { upcoming, past } = partitionTicketOrders(orders);
+
+  return {
+    upcoming,
+    past,
+    upcomingCount: upcoming.length,
+    pastCount: past.length,
+
+    isLoading: isAuthenticated && isPending,
+    isError,
+    refetch,
+  };
+};
