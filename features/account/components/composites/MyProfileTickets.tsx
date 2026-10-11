@@ -32,7 +32,7 @@ const MyProfileTickets = () => {
   const orders = activeTab === 'upcoming' ? upcoming : past;
 
   return (
-    <section className="bg-[#020B1C] p-[15px] min-h-[400px]">
+    <section className="min-h-[400px]">
       <TicketsTabs
         activeTab={activeTab}
         onChange={setActiveTab}
