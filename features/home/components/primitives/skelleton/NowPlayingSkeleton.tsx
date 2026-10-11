@@ -22,7 +22,7 @@ const NowPlayingSkeleton = () => {
     <section
       role="status"
       aria-label="Loading now playing movies"
-      className="bg-[#020B1C] py-[32px]"
+      className="py-[32px]"
     >
       <div className="mx-auto px-5 sm:px-10 lg:px-[64px] w-full max-w-[1728px]">
         <div className="bg-white/10 mb-[24px] rounded-[8px] w-[185px] h-[30px] animate-pulse" />

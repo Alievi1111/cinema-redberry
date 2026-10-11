@@ -35,7 +35,7 @@ const NowPlaying = () => {
   }
 
   return (
-    <section className="bg-[#020B1C] py-[32px]">
+    <section className="py-[32px]">
       <div className="mx-auto px-5 sm:px-10 lg:px-[64px] w-full max-w-[1728px]">
         <h2 className="mb-[24px] font-bold text-[24px] text-white">
           NOW PLAYING

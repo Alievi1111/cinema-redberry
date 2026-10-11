@@ -5,6 +5,7 @@ import { QueryProvider } from './QueryProvider';
 import Header from '@/features/common/components/composites/Header';
 
 import './globals.css';
+import Footer from '@/features/common/components/composites/Footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,6 +37,7 @@ export default function RootLayout({
           <Header />
 
           <main className="flex-1">{children}</main>
+          <Footer />
         </QueryProvider>
       </body>
     </html>

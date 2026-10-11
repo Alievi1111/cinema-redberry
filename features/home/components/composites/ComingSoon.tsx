@@ -27,7 +27,7 @@ const ComingSoon = () => {
   }
 
   return (
-    <section className="bg-[#020B1C] pt-10">
+    <section className="pt-10">
       <div className="mx-auto px-5 sm:px-10 lg:px-16 w-full max-w-[1728px]">
         <h2 className="mb-[24px] font-bold text-[24px] text-white">
           COMING SOON...
