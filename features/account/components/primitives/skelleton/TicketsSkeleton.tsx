@@ -34,7 +34,7 @@ const TicketsSkeleton = () => {
     <div
       role="status"
       aria-label="Loading tickets"
-      className="flex flex-col gap-[20px] bg-[#020B1C] p-[15px] min-h-[400px] animate-pulse"
+      className="flex flex-col gap-[20px] min-h-[400px] animate-pulse"
     >
       <div className="bg-[#1E2031] rounded-[12px] w-[199px] h-[39px]" />
 

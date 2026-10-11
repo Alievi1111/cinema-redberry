@@ -102,7 +102,7 @@ const ProfileDropdown = ({ user, onClose, onLogout }: ProfileDropdownProps) => {
 
       <nav aria-label="Account" className="mt-[16px] w-full">
         <Link
-          href="/profile"
+          href="/account?tab=profile"
           onClick={onClose}
           className="flex items-center gap-[8px] hover:bg-white/5 px-[20px] h-[40px] transition-colors duration-200"
         >
@@ -114,7 +114,7 @@ const ProfileDropdown = ({ user, onClose, onLogout }: ProfileDropdownProps) => {
         </Link>
 
         <Link
-          href="/tickets"
+          href="/account?tab=tickets"
           onClick={onClose}
           className="flex items-center gap-[8px] hover:bg-white/5 px-[20px] h-[40px] transition-colors duration-200"
         >
