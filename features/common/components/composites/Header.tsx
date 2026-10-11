@@ -106,9 +106,12 @@ const Header = () => {
               <span className="font-bold text-[#FF321F] text-[20px]">XII</span>
             </Link>
 
-            <p className="font-semibold text-[12px] text-white cursor-pointer">
+            <Link
+              href="/sessions"
+              className="font-semibold text-[12px] text-white cursor-pointer"
+            >
               SESSIONS
-            </p>
+            </Link>
           </div>
 
           <div className="flex items-center gap-[32px] ml-auto">
