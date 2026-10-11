@@ -1,30 +1,36 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 import type { SessionGroup } from '../../types/sessions.types';
 import ShowtimeCard from '../primitives/ShowtimeCard';
+import { movieHref } from '@/lib/routes';
 
 type SessionMovieGroupProps = {
   group: SessionGroup;
   viewerAge: number | null;
-  onGuestSelect: (sessionId: number, minimumAge: number | null) => void;
+  now: number;
 };
 
 const SessionMovieGroup = ({
   group,
   viewerAge,
-  onGuestSelect,
+  now,
 }: SessionMovieGroupProps) => {
   const { movie, sessions } = group;
 
   return (
     <li className="min-w-0 py-[32px] first:pt-0">
       <article aria-label={`${movie.title} showtimes`}>
-        <div className="flex min-w-0 items-center gap-[16px]">
+        <Link
+          href={movieHref(movie.slug)}
+          aria-label={`View ${movie.title} details`}
+          className="flex min-w-0 items-center gap-[16px] rounded-[8px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF321F]"
+        >
           <div className="relative h-[80px] w-[56px] shrink-0 overflow-hidden rounded-[8px] bg-[#2A2C3D]">
             {movie.posterUrl ? (
               <Image
                 src={movie.posterUrl}
-                alt=""
+                alt={`${movie.title} poster`}
                 fill
                 sizes="56px"
                 className="object-cover"
@@ -57,7 +63,7 @@ const SessionMovieGroup = ({
               </p>
             )}
           </div>
-        </div>
+        </Link>
 
         <div
           aria-label={`${movie.title} session times`}
@@ -68,9 +74,10 @@ const SessionMovieGroup = ({
               key={showtime.id}
               showtime={showtime}
               movieTitle={movie.title}
+              movieSlug={movie.slug}
               minimumAge={movie.ageRating?.minAge ?? null}
               viewerAge={viewerAge}
-              onGuestSelect={onGuestSelect}
+              now={now}
             />
           ))}
         </div>

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:booking": "node --experimental-strip-types --test features/booking/tests/*.test.mjs",
+    "test:account": "node --experimental-strip-types --test features/account/tests/*.test.mjs",
+    "test:recent": "node --experimental-strip-types --test features/recently-viewed/tests/*.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

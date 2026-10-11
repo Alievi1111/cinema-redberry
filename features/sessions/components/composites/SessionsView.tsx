@@ -1,16 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 
-import {
-  AUTH_USER_QUERY_KEY,
-  useAuthUser,
-} from '@/features/auth/hook/use-auth-user';
-import { waitForLogin } from '@/features/auth/lib/auth-challenge';
-import { getAuthSessionId } from '@/features/auth/lib/auth-session';
-import type { AuthUser } from '@/features/auth/types/type';
+import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useSessionClock } from '@/features/movie/hooks/use-session-clock';
 import { useFilterOptions } from '../../hook/use-filter-options';
 import { useSessionFilters } from '../../hook/use-session-filters';
 import { useSessions } from '../../hook/use-sessions';
@@ -21,15 +14,9 @@ import SessionPagination from '../primitives/SessionPagination';
 import SessionSortMenu from '../primitives/SessionSortMenu';
 
 const SessionsView = () => {
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const { user } = useAuthUser();
+  const now = useSessionClock();
   const resultsRef = useRef<HTMLElement>(null);
-  const pendingSession = useRef<{
-    id: number;
-    minimumAge: number | null;
-  } | null>(null);
-  const loginPending = useRef(false);
   const optionsQuery = useFilterOptions();
   const options = optionsQuery.data ?? null;
   const { filters, today, toggle, setDate, setSort, setPage, clear } =
@@ -54,34 +41,6 @@ const SessionsView = () => {
     if (page === filters?.page) return;
     setPage(page);
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleGuestSelect = (sessionId: number, minimumAge: number | null) => {
-    pendingSession.current = { id: sessionId, minimumAge };
-    if (loginPending.current) return;
-
-    loginPending.current = true;
-    void waitForLogin()
-      .then(() => {
-        const selection = pendingSession.current;
-        const signedInUser = queryClient.getQueryData<AuthUser>([
-          ...AUTH_USER_QUERY_KEY,
-          getAuthSessionId(),
-        ]);
-        if (!selection || !signedInUser) return;
-        if (
-          selection.minimumAge !== null &&
-          signedInUser.age !== null &&
-          signedInUser.age < selection.minimumAge
-        ) return;
-
-        router.push(`/sessions/${selection.id}/seats`);
-      })
-      .catch(() => {})
-      .finally(() => {
-        pendingSession.current = null;
-        loginPending.current = false;
-      });
   };
 
   if (optionsQuery.isPending) {
@@ -177,7 +136,7 @@ const SessionsView = () => {
                     key={group.movie.id}
                     group={group}
                     viewerAge={user?.age ?? null}
-                    onGuestSelect={handleGuestSelect}
+                    now={now}
                   />
                 ))}
               </ul>

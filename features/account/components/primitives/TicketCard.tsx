@@ -26,7 +26,7 @@ const TicketCard = ({ order, onRefund }: TicketCardProps) => {
         ? 'Refunds are unavailable for past sessions.'
         : !order.isRefundable
           ? 'Refund unavailable. The refund deadline may have passed.'
-          : 'Refund functionality is not connected yet.';
+          : 'Refund is currently unavailable.';
 
   return (
     <article className="relative flex lg:flex-row flex-col bg-[#1E2031] rounded-[26px] w-full max-w-[1400px] lg:min-h-[183px]">

@@ -31,9 +31,18 @@ const modalVariants = {
 export type PopupWrapperProps = {
   children: ReactNode;
   onClose: () => void;
+  closeDisabled?: boolean;
+  size?: 'default' | 'booking';
+  label?: string;
 };
 
-const PopupWrapper = ({ children, onClose }: PopupWrapperProps) => {
+const PopupWrapper = ({
+  children,
+  onClose,
+  closeDisabled = false,
+  size = 'default',
+  label = 'Popup',
+}: PopupWrapperProps) => {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
@@ -61,26 +70,27 @@ const PopupWrapper = ({ children, onClose }: PopupWrapperProps) => {
         animate="visible"
         exit="exit"
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/60 ${size === 'booking' ? 'backdrop-blur-[6px]' : ''}`}
+        onClick={closeDisabled ? undefined : onClose}
       />
 
       <motion.div
         role="dialog"
         aria-modal="true"
-        aria-label="Popup"
+        aria-label={label}
         variants={modalVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="z-10 relative bg-[#020B1C] p-8 rounded-[28px] w-full max-w-[475px] max-h-[calc(100dvh-32px)] overflow-y-auto"
+        className={`z-10 relative bg-[#020B1C] p-8 rounded-[28px] w-full max-h-[calc(100dvh-32px)] overflow-y-auto ${size === 'booking' ? 'max-w-[1146px] lg:min-h-[599px] overflow-x-hidden' : 'max-w-[475px]'}`}
       >
         <button
           type="button"
           aria-label="Close popup"
           onClick={onClose}
-          className="top-8 right-8 absolute flex justify-center items-center w-6 h-6 cursor-pointer"
+          disabled={closeDisabled}
+          className="top-8 right-8 absolute flex justify-center items-center w-6 h-6 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Image src="/icons/close.svg" alt="" width={24} height={24} />
         </button>

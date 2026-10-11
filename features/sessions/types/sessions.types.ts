@@ -26,6 +26,17 @@ export type FilterOptions = {
   languages: SessionLanguage[];
   timeBands: { id: string; label: string }[];
   sorts: { id: string; label: string }[];
+  ticketTypes: {
+    id: number;
+    slug: string;
+    name: string;
+    priceRatio: number;
+    note?: string | null;
+    blockedFromRatingAge?: number | null;
+  }[];
+  ageRatings: { code: string; minAge: number; description: string }[];
+  maxSeatsPerOrder: number;
+  holdMinutes: number;
 };
 
 export type FilterOptionsResponse = { data: FilterOptions };
@@ -56,6 +67,7 @@ export type SessionMovie = {
 
 export type Showtime = {
   id: number;
+  startsAt: string;
   time: string;
   price: number;
   seatsLeft: number;
