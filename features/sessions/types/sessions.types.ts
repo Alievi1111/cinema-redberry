@@ -41,13 +41,38 @@ export type SessionFilters = {
   page: number;
 };
 
-export type SessionGroupSummary = {
-  movie: { id: number; title: string };
-  sessions: { id: number }[];
+export type SessionMovie = {
+  id: number;
+  slug: string;
+  title: string;
+  runtimeMinutes: number | null;
+  posterUrl: string | null;
+  ageRating: {
+    code: string;
+    minAge: number;
+    description: string;
+  } | null;
+};
+
+export type Showtime = {
+  id: number;
+  time: string;
+  price: number;
+  seatsLeft: number;
+  isSoldOut: boolean;
+  hall: { id: number; name: string };
+  venue: Pick<SessionVenue, 'id' | 'slug' | 'name' | 'city'>;
+  format: SessionFormat;
+  language: SessionLanguage;
+};
+
+export type SessionGroup = {
+  movie: SessionMovie;
+  sessions: Showtime[];
 };
 
 export type SessionsResponse = {
-  data: SessionGroupSummary[];
+  data: SessionGroup[];
   meta: {
     currentPage: number;
     lastPage: number;
