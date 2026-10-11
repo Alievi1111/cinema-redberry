@@ -2,15 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 
-import {
-  AUTH_USER_QUERY_KEY,
-  useAuthUser,
-} from '@/features/auth/hook/use-auth-user';
+import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { waitForLogin } from '@/features/auth/lib/auth-challenge';
-import { getAuthSessionId } from '@/features/auth/lib/auth-session';
-import type { AuthUser } from '@/features/auth/types/type';
+import { getAuthToken } from '@/features/auth/lib/auth-session';
+import { seatSelectionHref } from '@/lib/routes';
 import { useFilterOptions } from '../../hook/use-filter-options';
 import { useSessionFilters } from '../../hook/use-session-filters';
 import { useSessions } from '../../hook/use-sessions';
@@ -22,13 +18,9 @@ import SessionSortMenu from '../primitives/SessionSortMenu';
 
 const SessionsView = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { user } = useAuthUser();
   const resultsRef = useRef<HTMLElement>(null);
-  const pendingSession = useRef<{
-    id: number;
-    minimumAge: number | null;
-  } | null>(null);
+  const pendingSession = useRef<number | null>(null);
   const loginPending = useRef(false);
   const optionsQuery = useFilterOptions();
   const options = optionsQuery.data ?? null;
@@ -56,26 +48,17 @@ const SessionsView = () => {
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleGuestSelect = (sessionId: number, minimumAge: number | null) => {
-    pendingSession.current = { id: sessionId, minimumAge };
+  const handleGuestSelect = (sessionId: number) => {
+    pendingSession.current = sessionId;
     if (loginPending.current) return;
 
     loginPending.current = true;
     void waitForLogin()
       .then(() => {
-        const selection = pendingSession.current;
-        const signedInUser = queryClient.getQueryData<AuthUser>([
-          ...AUTH_USER_QUERY_KEY,
-          getAuthSessionId(),
-        ]);
-        if (!selection || !signedInUser) return;
-        if (
-          selection.minimumAge !== null &&
-          signedInUser.age !== null &&
-          signedInUser.age < selection.minimumAge
-        ) return;
-
-        router.push(`/sessions/${selection.id}/seats`);
+        const sessionId = pendingSession.current;
+        if (sessionId !== null && getAuthToken()) {
+          router.push(seatSelectionHref(sessionId));
+        }
       })
       .catch(() => {})
       .finally(() => {

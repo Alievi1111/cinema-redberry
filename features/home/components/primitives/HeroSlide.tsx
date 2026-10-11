@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import type { FeaturedMovie } from '../../types/featured-movie.types';
 import { formatReleaseDate } from '../../utils/format-release-date';
+import { movieHref } from '@/lib/routes';
 
 interface HeroSlideProps {
   movie: FeaturedMovie;
@@ -12,11 +13,6 @@ interface HeroSlideProps {
 
 const HeroSlide = ({ movie, index, total }: HeroSlideProps) => {
   const releaseDate = formatReleaseDate(movie.releaseDate);
-
-  const movieSessionsHref = {
-    pathname: '/sessions',
-    query: { search: movie.title },
-  };
 
   return (
     <article
@@ -81,7 +77,7 @@ const HeroSlide = ({ movie, index, total }: HeroSlideProps) => {
 
           <div className="flex flex-wrap items-center gap-[10px] mt-[4px]">
             <Link
-              href={movieSessionsHref}
+              href={movieHref(movie.slug)}
               className="flex justify-center items-center gap-[4px] bg-[#FF321F] hover:bg-[#EC3013] rounded-full w-[143px] h-[42px] font-semibold text-[14px] text-white transition-colors"
             >
               <Image src="/icons/buy-tickets.svg" alt="" width={16} height={16} />

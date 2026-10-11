@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { getAuthToken } from '@/features/auth/lib/auth-session';
+import { seatSelectionHref } from '@/lib/routes';
 import type { Showtime } from '../../types/sessions.types';
 
 type ShowtimeCardProps = {
@@ -8,7 +9,7 @@ type ShowtimeCardProps = {
   movieTitle: string;
   minimumAge: number | null;
   viewerAge: number | null;
-  onGuestSelect: (sessionId: number, minimumAge: number | null) => void;
+  onGuestSelect: (sessionId: number) => void;
 };
 
 const LOW_SEAT_THRESHOLD = 5;
@@ -29,7 +30,7 @@ const ShowtimeCard = ({
       ? `Available for ages ${minimumAge} and up`
       : null;
   const lowSeats = showtime.seatsLeft <= LOW_SEAT_THRESHOLD;
-  const href = `/sessions/${showtime.id}/seats`;
+  const href = seatSelectionHref(showtime.id);
   const price = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
   }).format(showtime.price);
@@ -106,7 +107,7 @@ const ShowtimeCard = ({
       onNavigate={(event) => {
         if (!getAuthToken()) {
           event.preventDefault();
-          onGuestSelect(showtime.id, minimumAge);
+          onGuestSelect(showtime.id);
         }
       }}
       className={`${cardClass} transition-colors hover:bg-[#292C3D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF321F]`}

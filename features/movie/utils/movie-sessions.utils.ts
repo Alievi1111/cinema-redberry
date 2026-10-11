@@ -46,9 +46,8 @@ export const getSessionDisabledReason = (
 
   if (!user) return null;
 
-  if (!user.profileComplete) {
-    return 'Complete your profile before booking.';
-  }
+  // Incomplete profiles can open the seat page, where the profile form appears.
+  if (!user.profileComplete) return null;
 
   if (ageRating && (user.age === null || user.age < ageRating.minAge)) {
     return `This movie requires viewers to be at least ${ageRating.minAge} years old.`;

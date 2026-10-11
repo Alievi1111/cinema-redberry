@@ -8,14 +8,9 @@ import Image from 'next/image';
 import { useSearch } from '../../hook/use-search';
 import type { SearchResult } from '../../types/search.types';
 import SearchDropdown from '../primitives/SearchDropdown';
+import { movieHref } from '@/lib/routes';
 
-const getResultHref = (result: SearchResult) => {
-  if (result.kind === 'event') {
-    return `/events/${result.slug}`;
-  }
-
-  return `/movies/${result.slug}`;
-};
+const getResultHref = (result: SearchResult) => movieHref(result.slug);
 
 const HeaderSearch = () => {
   const router = useRouter();

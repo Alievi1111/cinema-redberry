@@ -1,8 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { waitForLogin } from '@/features/auth/lib/auth-challenge';
+import { getAuthToken } from '@/features/auth/lib/auth-session';
+import { seatSelectionHref } from '@/lib/routes';
 import { useMovieSessions } from '../../hooks/use-movie-sessions';
 
 import type {
@@ -24,12 +28,12 @@ interface MovieSessionsProps {
 }
 
 const MovieSessions = ({ movie }: MovieSessionsProps) => {
+  const router = useRouter();
   const { user } = useAuthUser();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
-    null
-  );
+  const pendingSessionId = useRef<number | null>(null);
+  const loginPending = useRef(false);
 
   const { days, activeDate } = useMemo(
     () => getMovieCalendar(movie.availableDates, selectedDate),
@@ -47,17 +51,32 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
     0
   );
 
-  const selectedSession = venues
-    .flatMap((venue) => venue.sessions)
-    .find((session) => session.id === selectedSessionId);
-
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
-    setSelectedSessionId(null);
   };
 
   const handleSessionSelect = (session: MovieSessionType) => {
-    setSelectedSessionId(session.id);
+    if (getAuthToken()) {
+      router.push(seatSelectionHref(session.id));
+      return;
+    }
+
+    pendingSessionId.current = session.id;
+    if (loginPending.current) return;
+
+    loginPending.current = true;
+    void waitForLogin()
+      .then(() => {
+        const sessionId = pendingSessionId.current;
+        if (sessionId !== null && getAuthToken()) {
+          router.push(seatSelectionHref(sessionId));
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        pendingSessionId.current = null;
+        loginPending.current = false;
+      });
   };
 
   return (
@@ -101,30 +120,8 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
                       venues={venues}
                       ageRating={movie.ageRating}
                       user={user}
-                      selectedSessionId={selectedSessionId}
                       onSelect={handleSessionSelect}
                     />
-
-                    {selectedSession && (
-                      <div
-                        role="status"
-                        className="bg-[#FF321F]/10 mt-[20px] px-[16px] py-[12px] border border-[#FF321F]/30 rounded-[12px]"
-                      >
-                        <p className="font-semibold text-[13px] text-white">
-                          Selected session: {selectedSession.time}
-                        </p>
-
-                        <p className="mt-[4px] text-[#A9A9A9] text-[12px]">
-                          Seat selection will be connected to the booking flow.
-                        </p>
-
-                        {!user && (
-                          <p className="mt-[4px] text-[#A9A9A9] text-[12px]">
-                            Sign in to continue with booking.
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </>
                 )}
               </div>

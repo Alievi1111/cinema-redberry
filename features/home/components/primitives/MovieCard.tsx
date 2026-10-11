@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import type { NowPlayingMovie } from '../../types/now-playing.types';
+import { movieHref } from '@/lib/routes';
 
 interface MovieCardProps {
   movie: NowPlayingMovie;
@@ -13,11 +14,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
   return (
     <article className="flex h-[452px] w-full flex-col rounded-[20px] bg-[#1D2033] p-3">
-      <div className="relative h-[300px] w-full shrink-0 overflow-hidden rounded-[16px] bg-[#252D3B] md:group-hover:h-[225px] md:group-focus-within:h-[225px] motion-safe:transition-[height] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]">
+      <Link href={movieHref(movie.slug)} className="relative block h-[300px] w-full shrink-0 overflow-hidden rounded-[16px] bg-[#252D3B] md:group-hover:h-[225px] md:group-focus-within:h-[225px] motion-safe:transition-[height] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]">
         {posterUrl ? (
           <Image
             src={posterUrl}
-            alt={movie.title}
+            alt={`${movie.title} poster`}
             fill
             sizes="236px"
             className={`object-cover motion-safe:transition-opacity motion-safe:duration-300 ${movie.backdropUrl ? 'md:group-hover:opacity-0 md:group-focus-within:opacity-0' : ''}`}
@@ -36,14 +37,13 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             className="object-cover opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 motion-safe:transition-opacity motion-safe:duration-500"
           />
         )}
-      </div>
+      </Link>
 
       <div className="mt-[10px] min-w-0">
-        <h3
-          title={movie.title}
-          className="font-bold text-[18px] text-white truncate leading-normal"
-        >
-          {movie.title}
+        <h3 className="truncate text-[18px] font-bold leading-normal text-white">
+          <Link href={movieHref(movie.slug)} title={movie.title}>
+            {movie.title}
+          </Link>
         </h3>
 
         <p className="text-[#8D91A3] text-[12px] truncate leading-[130%]">
@@ -74,7 +74,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </span>
 
         <Link
-          href={`/movie/${movie.slug}`}
+          href={movieHref(movie.slug)}
           className="flex justify-center items-center bg-[#FF321F] hover:opacity-90 px-[16px] rounded-full min-w-[119px] h-[35px] font-semibold text-[12px] text-white transition-opacity"
         >
           Buy Ticket

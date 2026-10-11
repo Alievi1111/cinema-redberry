@@ -72,7 +72,8 @@ const MovieHeroSection = ({ movie }: MovieHeroSectionProps) => {
             )}
 
             {movie.runtimeMinutes != null && (
-              <span className="bg-white/10 px-[10px] py-[6px] rounded-full font-semibold text-[12px] text-white">
+              <span className="inline-flex items-center gap-[6px] bg-white/10 px-[10px] py-[6px] rounded-full font-semibold text-[12px] text-white">
+                <Image src="/icons/movie-clock.svg" alt="" width={11} height={13} />
                 {movie.runtimeMinutes} Min
               </span>
             )}

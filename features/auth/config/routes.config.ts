@@ -1,5 +1,5 @@
 export const REDIRECT = {
   afterLogin: '/',
   afterLogout: '/',
-  completeProfile: '/profile',
+  completeProfile: '/account?tab=profile',
 } as const;

@@ -108,7 +108,7 @@ const SearchDropdown = ({
                       {result.posterUrl ? (
                         <Image
                           src={result.posterUrl}
-                          alt={result.title}
+                          alt={`${result.title} poster`}
                           fill
                           sizes="40px"
                           className="object-cover"
