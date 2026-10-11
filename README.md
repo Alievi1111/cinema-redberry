@@ -31,7 +31,7 @@ pnpm build
 pnpm start
 ```
 
-No `.env` file is required by the current code. The Axios client in [`lib/api.ts`](lib/api.ts) points to `https://api.kinoxii.redberryinternship.ge/api`, so the app needs access to that API for live data and booking.
+No `.env` file is required for local development. The Axios client in [`lib/api.ts`](lib/api.ts) points to `https://api.kinoxii.redberryinternship.ge/api`, so the app needs access to that API for live data and booking. When you deploy, set `NEXT_PUBLIC_SITE_URL` to the public origin (for example, `https://your-domain.example`) to enable canonical URLs and the sitemap. Vercel's production URL is used automatically when available.
 
 ## Routes
 
