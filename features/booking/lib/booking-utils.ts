@@ -5,6 +5,22 @@ import type { BookingOrder, SeatChoice, SeatHold } from '../types/booking.types'
 export const holdStorageKey = (userId: number, sessionId: string) =>
   `kinoxii_hold:${userId}:${sessionId}`;
 
+export const bookingWindowStorageKey = (userId: number, sessionId: string) =>
+  `kinoxii_booking_window:${userId}:${sessionId}`;
+
+export const bookingSecondsUntil = (
+  startedAt: number,
+  minutes: number,
+  holdExpiresAt: string | null,
+  now = Date.now()
+) => {
+  const bookingDeadline = startedAt + minutes * 60_000;
+  const deadline = holdExpiresAt
+    ? Math.min(bookingDeadline, Date.parse(holdExpiresAt))
+    : bookingDeadline;
+  return Math.max(0, Math.ceil((deadline - now) / 1000));
+};
+
 export const restoreChoices = (hold: SeatHold): SeatChoice[] =>
   hold.seats.map((seat) => ({
     seatId: seat.seatId,

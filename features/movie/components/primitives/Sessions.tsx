@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import BookingModal from '@/features/booking/components/BookingModal';
 import { releaseHoldApi } from '@/features/booking/api/booking-api';
-import { holdStorageKey } from '@/features/booking/lib/booking-utils';
+import { bookingWindowStorageKey, holdStorageKey } from '@/features/booking/lib/booking-utils';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { waitForLogin } from '@/features/auth/lib/auth-challenge';
 import { getAuthToken } from '@/features/auth/lib/auth-session';
@@ -136,6 +136,7 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
     if (!bookingSessionId || !user) return;
     const releaseOnBack = () => {
       if (new URLSearchParams(window.location.search).has('bookingSession')) return;
+      sessionStorage.removeItem(bookingWindowStorageKey(user.id, bookingSessionId));
       const key = holdStorageKey(user.id, bookingSessionId);
       const holdId = localStorage.getItem(key);
       if (!holdId) return;

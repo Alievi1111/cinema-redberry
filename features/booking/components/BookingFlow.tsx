@@ -14,7 +14,7 @@ import { hasSessionStarted } from '@/features/movie/utils/session-availability';
 import { createHoldApi, createOrderApi, getHoldApi, releaseHoldApi } from '../api/booking-api';
 import type { CheckoutValues } from '../schema/checkout-schema';
 import type { BookingApiError, BookingOrder, SeatChoice, SeatHold } from '../types/booking.types';
-import { availableTicketTypes, confirmationDetails, holdStorageKey, isLiveHold, isOldEnough, reconcileContested, releaseUnpaidHold, restoreBookingHold, restoreChoices, secondsUntil, toggleSeatChoice } from '../lib/booking-utils';
+import { availableTicketTypes, bookingSecondsUntil, bookingWindowStorageKey, confirmationDetails, holdStorageKey, isLiveHold, isOldEnough, reconcileContested, releaseUnpaidHold, restoreBookingHold, restoreChoices, secondsUntil, toggleSeatChoice } from '../lib/booking-utils';
 import CheckoutForm, { type CheckoutError } from './CheckoutForm';
 import SeatMapPicker from './SeatMapPicker';
 
@@ -34,6 +34,7 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
   const { session, seatMap } = useSeatSelection(sessionId, Boolean(user?.profileComplete));
   const options = useFilterOptions();
   const storageKey = user ? holdStorageKey(user.id, sessionId) : null;
+  const bookingWindowKey = user ? bookingWindowStorageKey(user.id, sessionId) : null;
   const [storedId, setStoredId] = useState<string | null>(() => storageKey && typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null);
   const [hold, setHold] = useState<SeatHold | null>(null);
   const [choices, setChoices] = useState<SeatChoice[]>([]);
@@ -43,7 +44,19 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
   const [checkoutError, setCheckoutError] = useState<CheckoutError | null>(null);
   const [contested, setContested] = useState<string[]>([]);
   const [now, setNow] = useState(() => Date.now());
+  const [bookingStartedAt, setBookingStartedAt] = useState<number | null>(null);
   const latestHoldId = useRef<string | null>(storedId);
+
+  useEffect(() => {
+    if (!bookingWindowKey) return;
+    const saved = Number(sessionStorage.getItem(bookingWindowKey));
+    const startedAt = Number.isFinite(saved) && saved > 0 ? saved : Date.now();
+    sessionStorage.setItem(bookingWindowKey, String(startedAt));
+    queueMicrotask(() => {
+      setBookingStartedAt(startedAt);
+      setNow(Date.now());
+    });
+  }, [bookingWindowKey]);
 
   const holdQuery = useQuery({
     queryKey: ['booking-hold', user?.id, sessionId, storedId],
@@ -51,6 +64,8 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
     enabled: Boolean(user && storedId && !hold && !order),
     retry: false,
   });
+  const holdMutation = useMutation({ mutationFn: (seats: SeatChoice[]) => createHoldApi(sessionId, seats) });
+  const orderMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: CheckoutValues }) => createOrderApi(id, values) });
 
   const forgetHold = () => {
     if (storageKey) localStorage.removeItem(storageKey);
@@ -59,20 +74,36 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
     setHold(null);
   };
 
+  const restartBookingWindow = () => {
+    const startedAt = Date.now();
+    if (bookingWindowKey) sessionStorage.setItem(bookingWindowKey, String(startedAt));
+    setBookingStartedAt(startedAt);
+    setNow(startedAt);
+  };
+
   const resetExpired = (warning = 'Your hold time expired. Please re-select your seats.') => {
+    const id = latestHoldId.current;
+    if (id && hold && isLiveHold(hold)) {
+      void releaseHoldApi(id).catch(() => {});
+    }
     forgetHold();
     setChoices([]);
     setStep('seats');
     setCheckoutError(null);
     setMessage(warning);
+    restartBookingWindow();
     void queryClient.invalidateQueries({ queryKey: ['seat-map', sessionId] });
   };
 
   useEffect(() => {
     const restored = holdQuery.data;
-    if (!restored || hold || order) return;
+    if (!restored || bookingStartedAt === null || !options.data || hold || order) return;
     if (restored.status === 'expired') {
       queueMicrotask(() => resetExpired());
+      return;
+    }
+    if (bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, restored.hold.expiresAt) === 0) {
+      queueMicrotask(() => resetExpired('Your booking time expired. Please re-select your seats.'));
       return;
     }
     queueMicrotask(() => {
@@ -82,9 +113,9 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
       setStep('checkout');
       void queryClient.invalidateQueries({ queryKey: ['seat-map', sessionId] });
     });
-  // Restoration is intentionally tied to the GET result, not to timer ticks.
+  // Restoration waits for the persisted booking start and the GET result.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [holdQuery.data]);
+  }, [holdQuery.data, bookingStartedAt, options.data]);
 
   useEffect(() => {
     if (!holdQuery.isError || !storedId) return;
@@ -104,12 +135,15 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
   }, []);
 
   useEffect(() => {
-    if (hold && secondsUntil(hold.expiresAt, now) === 0 && !order) {
-      queueMicrotask(() => resetExpired());
-    }
-  // The hold is reset only after its absolute expiry is reached.
+    if (bookingStartedAt === null || !options.data || order || holdMutation.isPending || orderMutation.isPending) return;
+    if (bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, hold?.expiresAt ?? null, now) > 0) return;
+    const warning = hold && secondsUntil(hold.expiresAt, now) === 0
+      ? 'Your hold time expired. Please re-select your seats.'
+      : 'Your booking time expired. Please re-select your seats.';
+    queueMicrotask(() => resetExpired(warning));
+  // Countdown uses the opening time and the absolute hold expiry.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hold, now, order]);
+  }, [bookingStartedAt, options.data, hold, now, order, holdMutation.isPending, orderMutation.isPending]);
 
   const invalidateBooking = () => {
     for (const key of ['seat-map', 'seat-session', 'sessions', 'movie-sessions', 'my-tickets']) {
@@ -119,6 +153,7 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
 
   const handleExit = () => {
     if (holdMutation.isPending || orderMutation.isPending) return;
+    if (bookingWindowKey) sessionStorage.removeItem(bookingWindowKey);
     const id = latestHoldId.current;
     if (id && !order) {
       forgetHold();
@@ -137,12 +172,13 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
     void queryClient.invalidateQueries({ queryKey: ['seat-map', sessionId] });
   };
 
-  const holdMutation = useMutation({ mutationFn: (seats: SeatChoice[]) => createHoldApi(sessionId, seats) });
-  const orderMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: CheckoutValues }) => createOrderApi(id, values) });
-
   const handleHold = async () => {
-    if (!choices.length || holdMutation.isPending || orderMutation.isPending) return;
+    if (!choices.length || holdMutation.isPending || orderMutation.isPending || bookingStartedAt === null || !options.data) return;
     setMessage(null);
+    if (bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, hold?.expiresAt ?? null) === 0) {
+      resetExpired('Your booking time expired. Please re-select your seats.');
+      return;
+    }
     if (hold && isLiveHold(hold) && choices.length === hold.seats.length &&
       choices.every((choice) => hold.seats.some((seat) => seat.seatId === choice.seatId && seat.ticketType.slug === choice.ticketType))) {
       setStep('checkout');
@@ -155,6 +191,11 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
     }
     try {
       const result = await holdMutation.mutateAsync(choices);
+      if (bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, result.expiresAt) === 0) {
+        void releaseHoldApi(result.holdId).catch(() => {});
+        resetExpired('Your booking time expired. Please re-select your seats.');
+        return;
+      }
       if (storageKey) localStorage.setItem(storageKey, result.holdId);
       latestHoldId.current = result.holdId;
       setStoredId(result.holdId);
@@ -179,10 +220,16 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
     if (!hold || !isLiveHold(hold) || orderMutation.isPending ||
       choices.length !== hold.seats.length ||
       !choices.every((choice) => hold.seats.some((seat) => seat.seatId === choice.seatId && seat.ticketType.slug === choice.ticketType))) return;
+    if (bookingStartedAt === null || !options.data ||
+      bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, hold.expiresAt) === 0) {
+      resetExpired('Your booking time expired. Please re-select your seats.');
+      return;
+    }
     setCheckoutError(null);
     try {
       const paid = await orderMutation.mutateAsync({ id: hold.holdId, values });
       forgetHold();
+      if (bookingWindowKey) sessionStorage.removeItem(bookingWindowKey);
       setOrder(paid);
       invalidateBooking();
     } catch (error) {
@@ -210,6 +257,12 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
   const holdMatchesChoices = Boolean(hold && choices.length === hold.seats.length && choices.every((choice) =>
     hold.seats.some((seat) => seat.seatId === choice.seatId && seat.ticketType.slug === choice.ticketType)));
   const subtotal = holdMatchesChoices ? hold!.subtotal : estimatedSubtotal;
+  const bookingSeconds = bookingStartedAt !== null && options.data
+    ? bookingSecondsUntil(bookingStartedAt, options.data.holdMinutes, hold?.expiresAt ?? null, now)
+    : null;
+  const countdown = bookingSeconds === null
+    ? '--:--'
+    : `${Math.floor(bookingSeconds / 60)}:${String(bookingSeconds % 60).padStart(2, '0')}`;
 
   const toggleSeat = (seat: Seat) => {
     setMessage(null);
@@ -246,10 +299,10 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
           <h1 className="text-xl font-extrabold uppercase">{session.data?.movie.title ?? 'Booking'}</h1>
           {session.data && <p className="mt-1 text-xs text-[#A9A9A9]">{session.data.venue.name} · Hall {session.data.hall.name} · {session.data.date} · {session.data.time} · {session.data.format.name} · {session.data.language.name}</p>}
         </div>
-        <p aria-label={hold ? 'Seats held countdown' : 'Hold time available at checkout'} className="shrink-0 rounded-xl bg-[#1E2031] px-3 py-2 text-center text-xs text-white">
-          <span className="block text-[#A9A9A9]">{hold ? 'SEATS HELD' : 'HOLD WINDOW'}</span>
-          <strong className="text-sm">{hold ? `${Math.floor(secondsUntil(hold.expiresAt, now) / 60)}:${String(secondsUntil(hold.expiresAt, now) % 60).padStart(2, '0')}` : options.data ? `${options.data.holdMinutes}:00` : '--:--'}</strong>
-          {!hold && <span className="block text-[10px] text-[#A9A9A9]">starts at checkout</span>}
+        <p aria-label="Booking time remaining" className="shrink-0 rounded-xl bg-[#1E2031] px-3 py-2 text-center text-xs text-white">
+          <span className="block text-[#A9A9A9]">BOOKING TIME</span>
+          <strong className="text-sm">{countdown}</strong>
+          {!hold && <span className="block text-[10px] text-[#A9A9A9]">seats held at checkout</span>}
         </p>
       </header>
       {message && <p role="alert" className="mt-5 rounded-xl border border-[#EC3013]/50 bg-[#EC3013]/10 px-4 py-3 text-sm text-white">{message}</p>}
@@ -281,8 +334,8 @@ export default function BookingFlow({ sessionId, expectedMovieSlug, onExit }: Bo
               </div>;
             })}</div> : <p className="mt-3 text-xs text-[#A9A9A9]">Pick up to {maxSeats} seats from the map. Each seat can carry its own ticket type.</p>}
             <div className="mt-auto pt-6"><div className="mb-4 flex items-center justify-between text-sm font-bold"><span>SUBTOTAL</span><span className="text-2xl">{money(subtotal)}</span></div>
-              {step === 'seats' ? <button type="button" disabled={!choices.length || holdMutation.isPending} onClick={() => void handleHold()} className={`${buttonClass} w-full`}>{holdMutation.isPending ? 'Holding seats…' : 'Next: Checkout'}</button>
-                : <button type="submit" form="booking-checkout" disabled={orderMutation.isPending || !hold || !isLiveHold(hold)} className={`${buttonClass} w-full`}>{orderMutation.isPending ? 'Completing order…' : 'Pay: Complete order'}</button>}
+              {step === 'seats' ? <button type="button" disabled={!choices.length || holdMutation.isPending || bookingSeconds === null || bookingSeconds === 0} onClick={() => void handleHold()} className={`${buttonClass} w-full`}>{holdMutation.isPending ? 'Holding seats…' : 'Next: Checkout'}</button>
+                : <button type="submit" form="booking-checkout" disabled={orderMutation.isPending || !hold || !isLiveHold(hold) || bookingSeconds === null || bookingSeconds === 0} className={`${buttonClass} w-full`}>{orderMutation.isPending ? 'Completing order…' : 'Pay: Complete order'}</button>}
             </div>
           </aside>
         </div>}

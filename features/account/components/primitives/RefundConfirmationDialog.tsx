@@ -21,7 +21,8 @@ export default function RefundConfirmationDialog({
   return (
     <PopupWrapper
       label={`Refund order ${order.reference}`}
-      onClose={() => { if (!pending) onClose(); }}
+      onClose={onClose}
+      closeDisabled={pending}
     >
       <div aria-busy={pending} className="text-white">
         <h2 className="pr-8 text-2xl font-extrabold">Refund tickets?</h2>

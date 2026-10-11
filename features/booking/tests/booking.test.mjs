@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   availableTicketTypes,
+  bookingSecondsUntil,
+  bookingWindowStorageKey,
   confirmationDetails,
   holdStorageKey,
   isOldEnough,
@@ -65,6 +67,16 @@ test('a live GET /holds response restores seats and the absolute expiry', async 
   assert.deepEqual(restoreChoices(restored.hold), [{ seatId: 1050, code: 'E7', ticketType: 'adult' }]);
   assert.ok(secondsUntil(response.expiresAt) <= 480);
   assert.equal(holdStorageKey(5, '1476'), 'kinoxii_hold:5:1476');
+});
+
+test('booking countdown starts at popup opening and keeps the earlier hold deadline', () => {
+  const openedAt = Date.parse('2026-10-11T12:00:00Z');
+  assert.equal(bookingWindowStorageKey(5, '1476'), 'kinoxii_booking_window:5:1476');
+  assert.equal(bookingSecondsUntil(openedAt, 8, null, openedAt), 480);
+  assert.equal(bookingSecondsUntil(openedAt, 8, null, openedAt + 1_000), 479);
+  assert.equal(bookingSecondsUntil(openedAt, 8, '2026-10-11T12:10:00Z', openedAt + 60_000), 420);
+  assert.equal(bookingSecondsUntil(openedAt, 8, '2026-10-11T12:05:00Z', openedAt + 60_000), 240);
+  assert.equal(bookingSecondsUntil(openedAt, 8, null, openedAt + 9 * 60_000), 0);
 });
 
 test('expired or foreign-session holds cannot restore checkout', async () => {
