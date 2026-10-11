@@ -74,7 +74,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </span>
 
         <Link
-          href={{ pathname: '/sessions', query: { search: movie.title } }}
+          href={`/movie/${movie.slug}`}
           className="flex justify-center items-center bg-[#FF321F] hover:opacity-90 px-[16px] rounded-full min-w-[119px] h-[35px] font-semibold text-[12px] text-white transition-opacity"
         >
           Buy Ticket
