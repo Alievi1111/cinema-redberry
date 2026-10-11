@@ -15,6 +15,9 @@ import { formatMovieDate, getMovieCalendar } from '../../utils/movie-date';
 import MovieDatePicker from './MovieDatePicker';
 import MovieVenueSessions from './MovieVenueSessions';
 import MovieDetails from './MovieDetails';
+import SessionsEmpty from './states/SessionsEmpty';
+import SessionsError from './states/SessionsError';
+import SessionsSkeleton from './states/SessionsSkeleton';
 
 interface MovieSessionsProps {
   movie: MovieDetailsType;
@@ -74,15 +77,7 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
           </p>
 
           {movie.isComingSoon ? (
-            <div className="bg-[#1E2031] mt-[20px] px-[20px] py-[35px] rounded-[18px] text-center">
-              <p className="font-semibold text-[16px] text-white">
-                Coming soon
-              </p>
-
-              <p className="mt-[8px] text-[#A9A9A9] text-[13px]">
-                Sessions and ticket booking are not available yet.
-              </p>
-            </div>
+            <SessionsEmpty variant="coming-soon" />
           ) : (
             <>
               <MovieDatePicker
@@ -93,39 +88,13 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
 
               <div className="mt-[27px]">
                 {!activeDate ? (
-                  <div className="bg-[#1E2031] px-[20px] py-[35px] rounded-[18px] text-[#A9A9A9] text-[14px] text-center">
-                    No sessions available for the next seven days.
-                  </div>
+                  <SessionsEmpty variant="next-seven-days" />
                 ) : isLoading ? (
-                  <div
-                    role="status"
-                    className="flex flex-col gap-[12px] animate-pulse"
-                  >
-                    {[1, 2].map((item) => (
-                      <div
-                        key={item}
-                        className="bg-[#1E2031] rounded-[18px] w-full h-[133px]"
-                      />
-                    ))}
-                  </div>
+                  <SessionsSkeleton />
                 ) : isError ? (
-                  <div className="flex flex-col items-center gap-[12px] bg-[#1E2031] px-[20px] py-[30px] rounded-[18px] text-center">
-                    <p className="text-[#A9A9A9] text-[14px]">
-                      Failed to load sessions.
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() => void refetch()}
-                      className="bg-[#FF321F] px-[20px] py-[10px] rounded-full font-semibold text-[12px] text-white cursor-pointer"
-                    >
-                      Try again
-                    </button>
-                  </div>
+                  <SessionsError onRetry={() => void refetch()} />
                 ) : venues.length === 0 ? (
-                  <div className="bg-[#1E2031] px-[20px] py-[35px] rounded-[18px] text-[#A9A9A9] text-[14px] text-center">
-                    No sessions found for this date.
-                  </div>
+                  <SessionsEmpty variant="selected-date" />
                 ) : (
                   <>
                     <MovieVenueSessions

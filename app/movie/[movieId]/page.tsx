@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
 import Movie from '@/features/movie/components/composites/Movie';
+import MovieSkeleton from '@/features/movie/components/primitives/states/MovieSkeleton';
 
 interface PageProps {
   params: Promise<{
@@ -16,7 +17,7 @@ const MovieContent = async ({ params }: PageProps) => {
 
 const MoviePage = ({ params }: PageProps) => {
   return (
-    <Suspense fallback={<div className="pt-[150px] min-h-screen" />}>
+    <Suspense fallback={<MovieSkeleton />}>
       <MovieContent params={params} />
     </Suspense>
   );
