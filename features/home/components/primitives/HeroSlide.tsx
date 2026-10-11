@@ -13,7 +13,10 @@ interface HeroSlideProps {
 const HeroSlide = ({ movie, index, total }: HeroSlideProps) => {
   const releaseDate = formatReleaseDate(movie.releaseDate);
 
-  const sessionsHref = `/movies/${movie.slug}#sessions`;
+  const movieSessionsHref = {
+    pathname: '/sessions',
+    query: { search: movie.title },
+  };
 
   return (
     <article
@@ -78,16 +81,16 @@ const HeroSlide = ({ movie, index, total }: HeroSlideProps) => {
 
           <div className="flex flex-wrap items-center gap-[10px] mt-[4px]">
             <Link
-              href={sessionsHref}
+              href={movieSessionsHref}
               className="flex justify-center items-center gap-[4px] bg-[#FF321F] hover:bg-[#EC3013] rounded-full w-[143px] h-[42px] font-semibold text-[14px] text-white transition-colors"
             >
-              <Image src="/icons/buyicon.svg" alt="" width={20} height={20} />
+              <Image src="/icons/buy-tickets.svg" alt="" width={16} height={16} />
 
               <span>Buy tickets</span>
             </Link>
 
             <Link
-              href={sessionsHref}
+              href="/sessions"
               className="flex justify-center items-center bg-[#344653] hover:bg-[#465A69] px-[22px] rounded-full h-[42px] font-semibold text-[14px] text-white transition-colors"
             >
               All sessions

@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 
-import { useAuthUser } from '@/features/auth/hook/use-auth-user';
+import { useAuthUser } from "@/features/auth/hook/use-auth-user";
 
 import {
   updateProfileSchema,
   type UpdateProfileFormValues,
-} from '../../schemas/update-profile.schema';
+} from "../../schemas/update-profile.schema";
 
-import type { ProfileValidationError } from '../../api/update-profile-api';
-import { useUpdateProfile } from '../../hook/use-update-profile';
+import type { ProfileValidationError } from "../../api/update-profile-api";
+import { useUpdateProfile } from "../../hook/use-update-profile";
 
-import ReusableUpdateProfileInput from '../primitives/ReusableUpdateProfileInput';
+import ReusableUpdateProfileInput from "../primitives/ReusableUpdateProfileInput";
 
 interface VenueOption {
   id: number;
@@ -42,25 +42,25 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
   } = useForm<UpdateProfileFormValues>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
-      fullName: '',
-      mobileNumber: '',
-      dateOfBirth: '',
-      preferredVenueId: '',
+      fullName: "",
+      mobileNumber: "",
+      dateOfBirth: "",
+      preferredVenueId: "",
     },
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   useEffect(() => {
     if (!user) return;
 
     reset({
-      fullName: user.fullName ?? '',
-      mobileNumber: user.mobileNumber ?? '',
-      dateOfBirth: user.dateOfBirth?.slice(0, 10) ?? '',
+      fullName: user.fullName ?? "",
+      mobileNumber: user.mobileNumber ?? "",
+      dateOfBirth: user.dateOfBirth?.slice(0, 10) ?? "",
       preferredVenueId: user.preferredVenue
         ? String(user.preferredVenue.id)
-        : '',
+        : "",
     });
   }, [user, reset]);
 
@@ -84,7 +84,7 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
 
   const onSubmit = async (values: UpdateProfileFormValues) => {
     setIsSaved(false);
-    clearErrors('root');
+    clearErrors("root");
 
     try {
       await mutateAsync(values);
@@ -97,10 +97,10 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         const serverErrors = error.response.data.errors;
 
         const fields = [
-          'fullName',
-          'mobileNumber',
-          'dateOfBirth',
-          'preferredVenueId',
+          "fullName",
+          "mobileNumber",
+          "dateOfBirth",
+          "preferredVenueId",
         ] as const;
 
         let hasFieldErrors = false;
@@ -112,15 +112,15 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
             hasFieldErrors = true;
 
             setError(field, {
-              type: 'server',
-              message: messages.join('\n'),
+              type: "server",
+              message: messages.join("\n"),
             });
           }
         });
 
         if (!hasFieldErrors) {
-          setError('root.server', {
-            type: 'server',
+          setError("root.server", {
+            type: "server",
             message: error.response.data.message,
           });
         }
@@ -128,9 +128,9 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         return;
       }
 
-      setError('root.server', {
-        type: 'server',
-        message: 'Unable to update profile. Please try again.',
+      setError("root.server", {
+        type: "server",
+        message: "Unable to update profile. Please try again.",
       });
     }
   };
@@ -163,7 +163,7 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         label="Full name"
         placeholder="Enter your full name"
         autoComplete="name"
-        registration={register('fullName')}
+        registration={register("fullName")}
         error={errors.fullName?.message}
       />
 
@@ -182,7 +182,7 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         type="tel"
         placeholder="599 123 456"
         autoComplete="tel"
-        registration={register('mobileNumber')}
+        registration={register("mobileNumber")}
         error={errors.mobileNumber?.message}
       />
 
@@ -191,7 +191,7 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         label="Date of birth"
         type="date"
         autoComplete="bday"
-        registration={register('dateOfBirth')}
+        registration={register("dateOfBirth")}
         error={errors.dateOfBirth?.message}
       />
 
@@ -201,7 +201,7 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         type="select"
         placeholder="Select preferred venue"
         options={venueOptions}
-        registration={register('preferredVenueId')}
+        registration={register("preferredVenueId")}
         error={errors.preferredVenueId?.message}
       />
 
@@ -209,9 +209,9 @@ const PersonalInformation = ({ venues = [] }: PersonalInformationProps) => {
         <button
           type="submit"
           disabled={isPending}
-          className="bg-[#EC3013] rounded-full w-[143px] h-[41px] font-extrabold text-[14px] cursor-pointer"
+          className="bg-[#EC3013] rounded-full w-[143px] h-[41px] font-extrabold text-[14px] cursor-pointer text-white"
         >
-          {isPending ? 'Saving...' : 'Save changes'}
+          {isPending ? "Saving..." : "Save changes"}
         </button>
 
         {errors.root?.server?.message && (

@@ -1,6 +1,7 @@
 'use client';
 
 import useEmblaCarousel from 'embla-carousel-react';
+import Link from 'next/link';
 import { useNowPlaying } from '../../hook/use-now-playing';
 import MovieCard from '../primitives/MovieCard';
 import NowPlayingSkeleton from '../primitives/skelleton/NowPlayingSkeleton';
@@ -37,9 +38,15 @@ const NowPlaying = () => {
   return (
     <section>
       <div className="mx-auto px-5 sm:px-10 lg:px-[64px] w-full max-w-[1728px]">
-        <h2 className="mb-[24px] font-bold text-[24px] text-white">
-          NOW PLAYING
-        </h2>
+        <div className="mb-[24px] flex items-center justify-between gap-4">
+          <h2 className="font-bold text-[24px] text-white">NOW PLAYING</h2>
+          <Link
+            href="/sessions"
+            className="shrink-0 text-[12px] font-semibold text-[#FF321F] hover:text-[#FF6B5C] focus-visible:outline-2 focus-visible:outline-[#FF321F]"
+          >
+            See all
+          </Link>
+        </div>
 
         <div
           ref={emblaRef}
@@ -47,7 +54,10 @@ const NowPlaying = () => {
         >
           <div className="flex gap-[16px] touch-pan-y select-none">
             {movies.map((movie) => (
-              <div key={movie.id} className="flex-[0_0_260px] min-w-0">
+              <div
+                key={movie.id}
+                className="group min-w-0 flex-[0_0_260px] md:hover:basis-[450px] md:focus-within:basis-[450px] motion-safe:transition-[flex-basis] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]"
+              >
                 <MovieCard movie={movie} />
               </div>
             ))}

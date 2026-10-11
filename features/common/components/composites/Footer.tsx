@@ -1,8 +1,8 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="flex justify-center mt-[43px] px-[34px] w-full">
+    <footer className="flex justify-center mt-[43px] px-[34px] w-full mb-[34px]">
       <div className="flex flex-col gap-[20px] w-full max-w-[1660px]">
         <div className="bg-[#2A2C3D] w-full h-[1px]" />
         <div className="flex justify-between w-full">
@@ -11,7 +11,7 @@ const Footer = () => {
 
             <span className="font-bold text-[#FF321F] text-[14px]">XII</span>
           </Link>
-          <p className="text-[#A9A9A9]">
+          <p className="text-[#A9A9A9] text-[12px]">
             © 2026 Kino XII. All rights reserved.
           </p>
         </div>

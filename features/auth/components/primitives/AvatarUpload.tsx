@@ -78,7 +78,7 @@ const AvatarUpload = ({ control, error }: AvatarUploadProps) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <Image src="/icons/uploadicon.svg" alt="" width={12} height={11} />
+            <Image src="/icons/upload-avatar.svg" alt="" width={12} height={11} />
           )}
         </div>
 

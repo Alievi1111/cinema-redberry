@@ -5,9 +5,17 @@ import { formatReleaseDate } from '../../utils/format-release-date';
 
 interface ComingSoonCardProps {
   movie: ComingSoonMovie;
+  isNotified: boolean;
+  isPending: boolean;
+  onNotify: () => void;
 }
 
-const ComingSoonCard = ({ movie }: ComingSoonCardProps) => {
+const ComingSoonCard = ({
+  movie,
+  isNotified,
+  isPending,
+  onNotify,
+}: ComingSoonCardProps) => {
   const releaseDate = formatReleaseDate(movie.releaseDate);
   const releaseYear = movie.releaseDate?.slice(0, 4);
 
@@ -59,14 +67,22 @@ const ComingSoonCard = ({ movie }: ComingSoonCardProps) => {
 
         <button
           type="button"
-          disabled
-          title="Notification API is not available yet"
-          className="flex justify-center items-center gap-[7px] opacity-80 mt-auto px-[10px] border border-[#A9A9A9] rounded-full h-[28px] cursor-not-allowed"
+          disabled={isNotified || isPending}
+          aria-busy={isPending}
+          onClick={onNotify}
+          aria-label={
+            isNotified
+              ? `Notification selected for ${movie.title}`
+              : isPending
+                ? `Adding notification for ${movie.title}`
+                : `Notify me about ${movie.title}`
+          }
+          className="flex justify-center items-center gap-[7px] mt-auto px-[10px] border border-[#A9A9A9] rounded-full h-[28px] text-white cursor-pointer transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-[#FF321F] disabled:cursor-default disabled:opacity-60"
         >
-          <Image src="/icons/NotifYMe.svg" alt="" width={12} height={13} />
+          <Image src="/icons/notify-me.svg" alt="" width={13} height={14} />
 
           <span className="font-semibold text-[12px] text-white whitespace-nowrap">
-            {movie.isNotified ? 'Notified' : 'Notify Me'}
+            {isNotified ? 'Notified' : isPending ? 'Adding...' : 'Notify Me'}
           </span>
         </button>
       </div>
