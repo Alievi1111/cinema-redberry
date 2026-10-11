@@ -16,6 +16,7 @@ interface MovieProps {
 const Movie = ({ movieId }: MovieProps) => {
   const { movie, isLoading, isError, error, refetch } = useMovie(movieId);
   const { user, isLoading: authLoading } = useAuthUser();
+  const userId = user?.id ?? null;
 
   useEffect(() => {
     if (isLoading || isError || !movie) return;
@@ -23,9 +24,9 @@ const Movie = ({ movieId }: MovieProps) => {
       recordRecentlyViewed(movie, null);
       return;
     }
-    if (user) mergeGuestRecentlyViewed(user.id);
-    recordRecentlyViewed(movie, user?.id ?? null);
-  }, [movie, isLoading, isError, authLoading, user?.id]);
+    if (userId !== null) mergeGuestRecentlyViewed(userId);
+    recordRecentlyViewed(movie, userId);
+  }, [movie, isLoading, isError, authLoading, userId]);
 
   if (isLoading) {
     return <MovieSkeleton />;
