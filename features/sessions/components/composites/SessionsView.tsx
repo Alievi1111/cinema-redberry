@@ -1,12 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
-import { waitForLogin } from '@/features/auth/lib/auth-challenge';
-import { getAuthToken } from '@/features/auth/lib/auth-session';
-import { seatSelectionHref } from '@/lib/routes';
+import { useSessionClock } from '@/features/movie/hooks/use-session-clock';
 import { useFilterOptions } from '../../hook/use-filter-options';
 import { useSessionFilters } from '../../hook/use-session-filters';
 import { useSessions } from '../../hook/use-sessions';
@@ -17,11 +14,9 @@ import SessionPagination from '../primitives/SessionPagination';
 import SessionSortMenu from '../primitives/SessionSortMenu';
 
 const SessionsView = () => {
-  const router = useRouter();
   const { user } = useAuthUser();
+  const now = useSessionClock();
   const resultsRef = useRef<HTMLElement>(null);
-  const pendingSession = useRef<number | null>(null);
-  const loginPending = useRef(false);
   const optionsQuery = useFilterOptions();
   const options = optionsQuery.data ?? null;
   const { filters, today, toggle, setDate, setSort, setPage, clear } =
@@ -46,25 +41,6 @@ const SessionsView = () => {
     if (page === filters?.page) return;
     setPage(page);
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleGuestSelect = (sessionId: number) => {
-    pendingSession.current = sessionId;
-    if (loginPending.current) return;
-
-    loginPending.current = true;
-    void waitForLogin()
-      .then(() => {
-        const sessionId = pendingSession.current;
-        if (sessionId !== null && getAuthToken()) {
-          router.push(seatSelectionHref(sessionId));
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        pendingSession.current = null;
-        loginPending.current = false;
-      });
   };
 
   if (optionsQuery.isPending) {
@@ -160,7 +136,7 @@ const SessionsView = () => {
                     key={group.movie.id}
                     group={group}
                     viewerAge={user?.age ?? null}
-                    onGuestSelect={handleGuestSelect}
+                    now={now}
                   />
                 ))}
               </ul>

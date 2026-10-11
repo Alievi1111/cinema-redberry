@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import type { NowPlayingMovie } from '../../types/now-playing.types';
-import { movieHref } from '@/lib/routes';
+import { movieBookingHref, movieHref } from '@/lib/routes';
 
 interface MovieCardProps {
   movie: NowPlayingMovie;
@@ -74,7 +74,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </span>
 
         <Link
-          href={movieHref(movie.slug)}
+          href={movieBookingHref(movie.slug)}
           className="flex justify-center items-center bg-[#FF321F] hover:opacity-90 px-[16px] rounded-full min-w-[119px] h-[35px] font-semibold text-[12px] text-white transition-opacity"
         >
           Buy Ticket

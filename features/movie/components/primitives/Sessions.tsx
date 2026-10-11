@@ -1,20 +1,26 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import BookingModal from '@/features/booking/components/BookingModal';
+import { releaseHoldApi } from '@/features/booking/api/booking-api';
+import { holdStorageKey } from '@/features/booking/lib/booking-utils';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { waitForLogin } from '@/features/auth/lib/auth-challenge';
 import { getAuthToken } from '@/features/auth/lib/auth-session';
-import { seatSelectionHref } from '@/lib/routes';
+import ProfileCompletionDialog from '@/features/seats/components/ProfileCompletionDialog';
+import { getMovieSessionsApi } from '../../api/movie-api';
+import { useSessionClock } from '../../hooks/use-session-clock';
 import { useMovieSessions } from '../../hooks/use-movie-sessions';
+import { findNextBookableSession } from '../../utils/session-availability';
 
 import type {
   MovieDetailsType,
   MovieSessionType,
 } from '../../types/movie.types';
 
-import { formatMovieDate, getMovieCalendar } from '../../utils/movie-date';
+import { formatMovieDate, getCinemaToday, getMovieCalendar } from '../../utils/movie-date';
 
 import MovieDatePicker from './MovieDatePicker';
 import MovieVenueSessions from './MovieVenueSessions';
@@ -28,11 +34,17 @@ interface MovieSessionsProps {
 }
 
 const MovieSessions = ({ movie }: MovieSessionsProps) => {
+  const { user, isLoading: authLoading, refetch: refetchUser } = useAuthUser();
   const router = useRouter();
-  const { user } = useAuthUser();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const bookingSessionId = searchParams.get('bookingSession');
+  const bookingIntent = searchParams.get('book') === '1';
+  const now = useSessionClock();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const pendingSessionId = useRef<number | null>(null);
+  const [bookingNotice, setBookingNotice] = useState<string | null>(null);
+  const pendingSession = useRef<MovieSessionType | null>(null);
   const loginPending = useRef(false);
 
   const { days, activeDate } = useMemo(
@@ -51,30 +63,124 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
     0
   );
 
+  const updateBookingParam = (sessionId: string | null) => {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete('book');
+    if (sessionId) next.set('bookingSession', sessionId);
+    else next.delete('bookingSession');
+    const url = `${pathname}${next.size ? `?${next}` : ''}`;
+    if (sessionId) router.push(url, { scroll: false });
+    else router.replace(url, { scroll: false });
+  };
+
+  useEffect(() => {
+    if (!bookingIntent || bookingSessionId) return;
+    const controller = new AbortController();
+    const clearIntent = (sessionId?: number) => {
+      const next = new URLSearchParams(window.location.search);
+      next.delete('book');
+      if (sessionId) next.set('bookingSession', String(sessionId));
+      router.replace(`${pathname}${next.size ? `?${next}` : ''}`, { scroll: false });
+    };
+
+    const openNextSession = async () => {
+      try {
+        if (movie.isComingSoon) {
+          setBookingNotice('Tickets are not on sale for this movie yet.');
+          clearIntent();
+          return;
+        }
+        const today = getCinemaToday();
+        const lastDay = new Date(`${today}T00:00:00Z`);
+        lastDay.setUTCDate(lastDay.getUTCDate() + 6);
+        const dates = [...new Set(movie.availableDates)]
+          .filter((date) => date >= today && date <= lastDay.toISOString().slice(0, 10))
+          .sort();
+
+        for (const date of dates) {
+          const groups = await getMovieSessionsApi(movie.slug, date, controller.signal);
+          if (controller.signal.aborted) return;
+          const session = findNextBookableSession(groups, Date.now());
+          if (!session) continue;
+          setSelectedDate(date);
+          clearIntent(session.id);
+          return;
+        }
+        if (controller.signal.aborted) return;
+        setBookingNotice('No upcoming sessions are available for this movie.');
+        clearIntent();
+      } catch {
+        if (controller.signal.aborted) return;
+        setBookingNotice('Could not find an upcoming session. Please try again.');
+        clearIntent();
+      }
+    };
+
+    void openNextSession();
+    return () => controller.abort();
+  }, [bookingIntent, bookingSessionId, movie.availableDates, movie.isComingSoon, movie.slug, pathname, router]);
+
+  useEffect(() => {
+    if (!bookingSessionId || user || authLoading || loginPending.current) return;
+    loginPending.current = true;
+    void waitForLogin()
+      .catch(() => {
+        const next = new URLSearchParams(window.location.search);
+        next.delete('bookingSession');
+        router.replace(`${pathname}${next.size ? `?${next}` : ''}`, { scroll: false });
+      })
+      .finally(() => { loginPending.current = false; });
+  }, [bookingSessionId, user, authLoading, router, pathname]);
+
+  useEffect(() => {
+    if (!bookingSessionId || !user) return;
+    const releaseOnBack = () => {
+      if (new URLSearchParams(window.location.search).has('bookingSession')) return;
+      const key = holdStorageKey(user.id, bookingSessionId);
+      const holdId = localStorage.getItem(key);
+      if (!holdId) return;
+      localStorage.removeItem(key);
+      void releaseHoldApi(holdId).catch(() => {});
+    };
+    window.addEventListener('popstate', releaseOnBack);
+    return () => window.removeEventListener('popstate', releaseOnBack);
+  }, [bookingSessionId, user]);
+
   const handleDateChange = (date: string) => {
     setSelectedDate(date);
   };
 
   const handleSessionSelect = (session: MovieSessionType) => {
-    if (getAuthToken()) {
-      router.push(seatSelectionHref(session.id));
+    if (Date.parse(session.startsAt) <= Date.now()) {
+      setBookingNotice('This session has already started. Choose a later showtime.');
+      return;
+    }
+    setBookingNotice(null);
+    if (user) {
+      updateBookingParam(String(session.id));
       return;
     }
 
-    pendingSessionId.current = session.id;
+    pendingSession.current = session;
     if (loginPending.current) return;
 
     loginPending.current = true;
-    void waitForLogin()
+    const restoreSession = getAuthToken()
+      ? refetchUser().then(({ data }) => {
+          if (!data) return waitForLogin();
+        })
+      : waitForLogin();
+
+    void restoreSession
       .then(() => {
-        const sessionId = pendingSessionId.current;
-        if (sessionId !== null && getAuthToken()) {
-          router.push(seatSelectionHref(sessionId));
+        const selected = pendingSession.current;
+        if (selected && getAuthToken()) {
+          updateBookingParam(String(selected.id));
         }
       })
       .catch(() => {})
       .finally(() => {
-        pendingSessionId.current = null;
+        pendingSession.current = null;
         loginPending.current = false;
       });
   };
@@ -94,6 +200,8 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
                 ? `${sessionsCount} sessions on ${formatMovieDate(activeDate)}`
                 : 'Choose an available date to see sessions'}
           </p>
+
+          {bookingNotice && <p role="status" className="mt-3 text-sm text-[#FF634F]">{bookingNotice}</p>}
 
           {movie.isComingSoon ? (
             <SessionsEmpty variant="coming-soon" />
@@ -120,6 +228,7 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
                       venues={venues}
                       ageRating={movie.ageRating}
                       user={user}
+                      now={now}
                       onSelect={handleSessionSelect}
                     />
                   </>
@@ -131,6 +240,19 @@ const MovieSessions = ({ movie }: MovieSessionsProps) => {
 
         <MovieDetails movie={movie} />
       </div>
+
+      {bookingSessionId && user?.profileComplete && (
+        <BookingModal
+          key={`${user.id}:${bookingSessionId}`}
+          sessionId={bookingSessionId}
+          movieSlug={movie.slug}
+          onClose={() => updateBookingParam(null)}
+        />
+      )}
+
+      {bookingSessionId && user && !user.profileComplete && (
+        <ProfileCompletionDialog onClose={() => updateBookingParam(null)} />
+      )}
     </section>
   );
 };

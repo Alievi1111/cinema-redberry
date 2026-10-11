@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMyTicketsApi } from '../api/get-my-tickets-api';
 import { useAuthUser } from '@/features/auth/hook/use-auth-user';
 import { useAuthSession } from '@/features/auth/hook/use-auth-session';
+import { partitionTicketOrders } from '../utils/refund-order';
 
 export const MY_TICKETS_QUERY_KEY = ['my-tickets'] as const;
 
@@ -27,13 +28,7 @@ export const useMyTickets = () => {
 
   const orders = data ?? [];
 
-  const upcoming = orders.filter(
-    (order) => order.isUpcoming && order.status === 'paid'
-  );
-
-  const past = orders.filter(
-    (order) => !order.isUpcoming || order.status !== 'paid'
-  );
+  const { upcoming, past } = partitionTicketOrders(orders);
 
   return {
     upcoming,

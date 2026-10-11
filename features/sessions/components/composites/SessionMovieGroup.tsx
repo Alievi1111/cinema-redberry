@@ -8,13 +8,13 @@ import { movieHref } from '@/lib/routes';
 type SessionMovieGroupProps = {
   group: SessionGroup;
   viewerAge: number | null;
-  onGuestSelect: (sessionId: number) => void;
+  now: number;
 };
 
 const SessionMovieGroup = ({
   group,
   viewerAge,
-  onGuestSelect,
+  now,
 }: SessionMovieGroupProps) => {
   const { movie, sessions } = group;
 
@@ -74,9 +74,10 @@ const SessionMovieGroup = ({
               key={showtime.id}
               showtime={showtime}
               movieTitle={movie.title}
+              movieSlug={movie.slug}
               minimumAge={movie.ageRating?.minAge ?? null}
               viewerAge={viewerAge}
-              onGuestSelect={onGuestSelect}
+              now={now}
             />
           ))}
         </div>

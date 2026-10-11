@@ -1,15 +1,16 @@
 import Link from 'next/link';
 
-import { getAuthToken } from '@/features/auth/lib/auth-session';
-import { seatSelectionHref } from '@/lib/routes';
+import { movieSessionBookingHref } from '@/lib/routes';
+import { hasSessionStarted } from '@/features/movie/utils/session-availability';
 import type { Showtime } from '../../types/sessions.types';
 
 type ShowtimeCardProps = {
   showtime: Showtime;
   movieTitle: string;
+  movieSlug: string;
   minimumAge: number | null;
   viewerAge: number | null;
-  onGuestSelect: (sessionId: number) => void;
+  now: number;
 };
 
 const LOW_SEAT_THRESHOLD = 5;
@@ -17,20 +18,24 @@ const LOW_SEAT_THRESHOLD = 5;
 const ShowtimeCard = ({
   showtime,
   movieTitle,
+  movieSlug,
   minimumAge,
   viewerAge,
-  onGuestSelect,
+  now,
 }: ShowtimeCardProps) => {
   const soldOut = showtime.isSoldOut || showtime.seatsLeft <= 0;
+  const started = hasSessionStarted(showtime.startsAt, now);
   const underage =
     viewerAge !== null && minimumAge !== null && viewerAge < minimumAge;
   const disabledReason = soldOut
     ? 'Sold out'
+    : started
+      ? 'This session has already started.'
     : underage
       ? `Available for ages ${minimumAge} and up`
       : null;
   const lowSeats = showtime.seatsLeft <= LOW_SEAT_THRESHOLD;
-  const href = seatSelectionHref(showtime.id);
+  const href = movieSessionBookingHref(movieSlug, showtime.id);
   const price = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
   }).format(showtime.price);
@@ -105,9 +110,8 @@ const ShowtimeCard = ({
       prefetch={false}
       aria-label={`${movieTitle}, ${showtime.time}, ${showtime.format.name}, ${showtime.language.name}, ${showtime.venue.name}, Hall ${showtime.hall.name}, ${showtime.seatsLeft} seats left, ₾${price}`}
       onNavigate={(event) => {
-        if (!getAuthToken()) {
+        if (hasSessionStarted(showtime.startsAt, Date.now())) {
           event.preventDefault();
-          onGuestSelect(showtime.id);
         }
       }}
       className={`${cardClass} transition-colors hover:bg-[#292C3D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF321F]`}

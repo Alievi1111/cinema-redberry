@@ -1,4 +1,5 @@
 import type { MovieDetailsType, MovieSessionType } from '../types/movie.types';
+import { hasSessionStarted } from './session-availability';
 
 export interface BookingUser {
   age: number | null;
@@ -38,10 +39,15 @@ export const groupSessionsByHall = (sessions: MovieSessionType[]) => {
 export const getSessionDisabledReason = (
   session: MovieSessionType,
   ageRating: MovieDetailsType['ageRating'],
-  user: BookingUser | null | undefined
+  user: BookingUser | null | undefined,
+  now: number
 ): string | null => {
   if (session.isSoldOut || session.seatsLeft <= 0) {
     return 'This session is sold out.';
+  }
+
+  if (hasSessionStarted(session.startsAt, now)) {
+    return 'This session has already started.';
   }
 
   if (!user) return null;

@@ -1,5 +1,6 @@
 export interface SeatSession {
   id: number;
+  startsAt: string;
   date: string;
   time: string;
   price: number;
@@ -20,7 +21,7 @@ export interface Seat {
   id: number;
   code: string;
   label: string;
-  state: string;
+  state: 'available' | 'sold' | 'held' | 'unavailable';
   aisleAfter: boolean;
   isMine: boolean;
 }

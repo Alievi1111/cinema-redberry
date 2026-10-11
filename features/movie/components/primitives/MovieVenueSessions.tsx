@@ -16,6 +16,7 @@ interface MovieVenueSessionsProps {
   venues: MovieVenueGroup[];
   ageRating: MovieDetailsType['ageRating'];
   user: BookingUser | null | undefined;
+  now: number;
   onSelect: (session: MovieSessionType) => void;
 }
 
@@ -23,6 +24,7 @@ const MovieVenueSessions = ({
   venues,
   ageRating,
   user,
+  now,
   onSelect,
 }: MovieVenueSessionsProps) => {
   return (
@@ -51,7 +53,8 @@ const MovieVenueSessions = ({
                       disabledReason={getSessionDisabledReason(
                         session,
                         ageRating,
-                        user
+                        user,
+                        now
                       )}
                       onSelect={onSelect}
                     />
